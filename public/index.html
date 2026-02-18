@@ -13,26 +13,19 @@
             color: #333;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
+        h1,
         h2 {
             text-align: center;
-            margin-bottom: 16px;
         }
 
         .online {
             color: #1e7f3c;
             font-weight: bold;
-
         }
 
         .offline {
             color: #b42318;
             font-weight: bold;
-
         }
 
         .running {
@@ -45,7 +38,6 @@
             font-weight: bold;
         }
 
-        /* ===== TABLE BASE ===== */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -55,142 +47,46 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            border-right: 1px solid #cbd5e1;
+        }
+
+        th:last-child,
+        td:last-child {
+            border-right: none;
+        }
 
         thead tr:first-child th {
             background: #2563eb;
-
             color: white;
-            font-weight: 600;
         }
 
         thead tr:nth-child(2) th {
             background: #3b82f6;
-
             color: white;
-            font-weight: 500;
-        }
-
-
-        th,
-        td {
-            padding: 12px 14px;
-            text-align: center;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-
-        tbody tr:hover {
-            background: #eff6ff;
-
-        }
-
-        td:nth-child(2) {
-            text-align: center;
-            white-space: nowrap;
-        }
-
-
-        table th,
-        table td {
-            border-right: 1px solid #cbd5e1;
-
-        }
-
-        table th:last-child,
-        table td:last-child {
-            border-right: none;
         }
 
         tbody tr:hover {
             background: #f9fafb;
         }
 
-
         .table-responsive {
-            width: 100%;
             overflow-x: auto;
         }
-
-        .table-responsive table {
-            min-width: 900px;
-            /* keeps columns readable */
-        }
-
 
         .divider {
             height: 1px;
             background: #e5e7eb;
             margin: 50px auto;
-            max-width: 1100px;
         }
-
-        .filters {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .filters select,
-        .filters input {
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            min-width: 180px;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .filters button {
-            padding: 8px 18px;
-            border-radius: 8px;
-            background: white;
-            border: 1px solid #2563eb;
-            color: #2563eb;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        /* Hover effect */
-        .filters button:hover {
-            background: #2563eb;
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        /* Click / press effect */
-        .filters button:active {
-            transform: scale(0.97);
-            box-shadow: none;
-        }
-
-        /* Optional: make Reset slightly different */
-        .filters button:last-child {
-            border-color: #d97706;
-            color: #d97706;
-        }
-
-        .filters button:last-child:hover {
-            background: #d97706;
-            color: white;
-        }
-
 
         .summary {
             max-width: 1100px;
-            margin: 0 auto 50px auto;
+            margin: auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
@@ -198,21 +94,16 @@
 
         .summary-card {
             background: white;
-            border-radius: 14px;
             padding: 20px;
             text-align: center;
+            border-radius: 14px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         }
 
         .summary-card .value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             color: #2563eb;
-            margin-top: 10px;
-        }
-
-        td {
-            vertical-align: middle;
         }
     </style>
 </head>
@@ -222,69 +113,34 @@
     <h1>AI Box Dashboard</h1>
 
     <!-- ================= LIVE STATUS ================= -->
-    <div class="live-wrapper">
+    <div class="table-responsive">
+        <h2>AI Box Live Status</h2>
 
-        <div class="table-card">
-            <div class="table-responsive">
-                <h2>AI Box Live Status</h2>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th rowspan="2">No.</th>
-                            <th rowspan="2">Service Name</th>
-                            <th colspan="3">AI Box</th>
-                            <th colspan="2">Node-RED</th>
-                        </tr>
-                        <tr>
-                            <th>AI Box Status</th>
-                            <th>Service Status</th>
-                            <th>Last Heartbeat</th>
-                            <th>Status</th>
-                            <th>Last Heartbeat</th>
-                        </tr>
-                    </thead>
-                    <tbody id="liveTable">
-                        <tr>
-                            <td colspan="7">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- ================= FILTER ================= -->
-    <div class="filters">
-        <div class="filter-group">
-            <label>Box Code</label>
-            <select id="searchBoxCode">
-                <option value="">All</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>IP Address</label>
-            <select id="searchIP">
-                <option value="">All</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Date Range</label>
-            <div style="display:flex; gap:6px;">
-                <input type="date" id="startDate">
-                <input type="date" id="endDate">
-            </div>
-        </div>
-
-        <div class="filter-actions">
-            <button onclick="applyFilter()">Search</button>
-            <button onclick="resetFilter()">Reset</button>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">No.</th>
+                    <th rowspan="2">Site</th>
+                    <th colspan="6">AI Box</th>
+                    <th colspan="2">Node-RED</th>
+                </tr>
+                <tr>
+                    <th>Device Status</th>
+                    <th>Last Heartbeat</th>
+                    <th>Media</th>
+                    <th>Last Update</th>
+                    <th>AI Server</th>
+                    <th>Last Update</th>
+                    <th>Service</th>
+                    <th>Last Update</th>
+                </tr>
+            </thead>
+            <tbody id="liveTable">
+                <tr>
+                    <td colspan="10">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div class="divider"></div>
@@ -316,22 +172,19 @@
                 <tr>
                     <th>Box Code</th>
                     <th>Online Status</th>
-                    <!-- <th>Service Status</th> -->
                     <th>Date & Time</th>
                     <th>Duration</th>
                 </tr>
             </thead>
             <tbody id="logTable">
                 <tr>
-                    <td colspan="5">Loading...</td>
+                    <td colspan="4">Loading...</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <script>
-        let currentQuery = "";
-
         function parseTS(ts) {
             const [d, t] = ts.split(" ");
             const [day, mon, yr] = d.split("/");
@@ -348,135 +201,48 @@
         }
 
         async function loadLiveStatus() {
-            const [boxRes, nodeRes] = await Promise.all([
-                fetch("/boxes"),
-                fetch("/nodered/status")
-            ]);
+            const res = await fetch("/boxes");
+            const data = await res.json();
 
-            const boxes = await boxRes.json();
-            const node = await nodeRes.json();
+            liveTable.innerHTML = data.map((row, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${row.site}</td>
 
-            liveTable.innerHTML = boxes.map((row, i) => `
-        <tr>
-            <td>${i + 1}</td>
-            <td>${row.service_name}</td>
+                <td class="${row.aiBoxStatus}">
+                    ${row.aiBoxStatus}
+                </td>
+                <td>${row.aiBoxLast}</td>
 
-            <td class="${row.online_status}">
-                ${row.online_status}
-            </td>
+                <td class="${row.mediaStatus}">
+                    ${row.mediaStatus}
+                </td>
+                <td>${row.mediaLast}</td>
 
-            <td class="${row.service_status}">
-                ${row.service_status}
-            </td>
+                <td class="${row.aiServerStatus}">
+                    ${row.aiServerStatus}
+                </td>
+                <td>${row.aiServerLast}</td>
 
-            <td>${row.last_heartbeat}</td>
-
-            <td class="${node.online ? "online" : "offline"}">
-                ${node.online ? "online" : "offline"}
-            </td>
-
-            <td>${node.last_heartbeat || "-"}</td>
-        </tr>
-           `).join("");
+                <td class="${row.nodeStatus}">
+                    ${row.nodeStatus}
+                </td>
+                <td>${row.nodeLast}</td>
+            </tr>
+        `).join("");
         }
 
-
-
-        async function loadLogs(query = "") {
-            const r = await fetch(`/logs${query}`);
-            let logs = await r.json();
-
-            // sort newest first
-            logs.sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp));
-
-            //  SHOW ONLY 5 WHEN NO FILTER
-            if (!query) {
-                logs = logs.slice(0, 5);
-            }
-
-            const now = new Date();
-
-            logTable.innerHTML = logs.length
-                ? logs.map((l, i) => {
-                    const start = parseTS(l.timestamp);
-                    const end = logs[i - 1]
-                        ? parseTS(logs[i - 1].timestamp)
-                        : now;
-
-                    return `
-                <tr>
-                    <td>${l.boxCode}</td>
-                    <td class="${l.online_status}">${l.online_status}</td>
-                    <td>${l.timestamp}</td>
-                    <td>${formatDuration(end - start)}</td>
-                </tr>
-            `;
-                }).join("")
-                : `<tr><td colspan="4">No data found</td></tr>`;
-        }
-        async function loadStats(q = "") {
-            const r = await fetch(`/stats${q}`);
-            const s = await r.json();
-            totalHeartbeats.innerText = s.totalHeartbeats;
-            totalOnline.innerText = formatDuration(s.totalOnlineMs);
-            totalOffline.innerText = formatDuration(s.totalOfflineMs);
-        }
-
-        function buildQuery() {
-            const p = new URLSearchParams();
-            if (searchBoxCode.value) p.append("boxCode", searchBoxCode.value);
-            if (startDate.value) p.append("from", startDate.value);
-            if (endDate.value) p.append("to", endDate.value);
-            return "?" + p.toString();
-        }
-
-        function applyFilter() {
-            currentQuery = buildQuery();
-            loadLogs(currentQuery);
-            loadStats(currentQuery);
-        }
-        function resetFilter() {
-            searchBoxCode.value = "";
-            startDate.value = "";
-            endDate.value = "";
-            currentQuery = "";
-            loadLogs();
-            loadStats();
-        }
-
-        async function populateFilters() {
-            const r = await fetch("/logs");
-            const logs = await r.json();
-
-            const aiBoxLogs = logs.filter(l => l.source === "AI_BOX");
-
-            const boxCodes = [...new Set(aiBoxLogs.map(l => l.boxCode).filter(Boolean))];
-            searchBoxCode.innerHTML = `<option value="">All</option>`;
-            boxCodes.forEach(code => {
-                searchBoxCode.innerHTML += `<option value="${code}">${code}</option>`;
-            });
-
-            const ips = [...new Set(aiBoxLogs.map(l => l.ip).filter(Boolean))];
-            searchIP.innerHTML = `<option value="">All</option>`;
-            ips.forEach(ip => {
-                searchIP.innerHTML += `<option value="${ip}">${ip}</option>`;
-            });
-        }
-
-        populateFilters();
         loadLiveStatus();
-
         loadLogs();
         loadStats();
 
         setInterval(() => {
             loadLiveStatus();
-
-            loadLogs(currentQuery);
-            loadStats(currentQuery);
+            loadLogs();
+            loadStats();
         }, 5000);
-    </script>
 
+    </script>
 </body>
 
 </html>

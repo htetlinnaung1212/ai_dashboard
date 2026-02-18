@@ -225,70 +225,85 @@ app.get("/boxes", (req, res) => {
     const logs = readLogs();
     const now = Date.now();
 
-    /* ---------------- AI BOX HEARTBEAT ---------------- */
-    const lastBoxHB = {};
-    logs
-        .filter(l => l.type === "heartbeat" && l.source === "AI_BOX")
-        .forEach(l => {
-            const ts = parseTS(l.timestamp).getTime();
-            if (!lastBoxHB[l.boxCode] || lastBoxHB[l.boxCode].ts < ts) {
-                lastBoxHB[l.boxCode] = { ...l, ts };
-            }
-        });
+    const boxes = [...new Set(
+        logs
+            .filter(l => l.boxCode)
+            .map(l => l.boxCode)
+    )];
 
-    /* ---------------- NODE-RED HEARTBEAT ---------------- */
-    const nodeHB = logs
-        .filter(l => l.type === "heartbeat" && l.source === "NODE_RED")
-        .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp))[0];
+    const rows = boxes.map(boxCode => {
 
-    const nodeOnline =
-        nodeHB &&
-        now - parseTS(nodeHB.timestamp).getTime() < HEARTBEAT_TIMEOUT;
+        /* ---- AI BOX HEARTBEAT ---- */
+        const lastBoxHB = logs
+            .filter(l =>
+                l.boxCode === boxCode &&
+                l.source === "AI_BOX" &&
+                l.type === "heartbeat"
+            )
+            .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp))[0];
 
-    /* ---------------- SERVICE STATUS (SOURCE OF TRUTH) ---------------- */
-    const latestService = {};
-    logs
-        .filter(l => l.type === "service_status")
-        .forEach(l => {
-            const key = `${l.boxCode}_${l.service_name}`;
-            const ts = parseTS(l.timestamp).getTime();
-            if (!latestService[key] || latestService[key].ts < ts) {
-                latestService[key] = { ...l, ts };
-            }
-        });
-
-    const rows = [];
-
-    Object.entries(SERVICE_MAP).forEach(([boxCode, services]) => {
-        const hb = lastBoxHB[boxCode];
         const boxOnline =
-            hb && now - hb.ts < HEARTBEAT_TIMEOUT;
+            lastBoxHB &&
+            now - parseTS(lastBoxHB.timestamp).getTime() < HEARTBEAT_TIMEOUT;
 
-        services.forEach(service => {
-            const key = `${boxCode}_${service}`;
-            const s = latestService[key];
+        /* ---- NODE-RED HEARTBEAT (PER BOX) ---- */
+        const lastNodeHB = logs
+            .filter(l =>
+                l.boxCode === boxCode &&
+                l.source === "NODE_RED" &&
+                l.type === "heartbeat"
+            )
+            .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp))[0];
 
-            //  CORRECT SERVICE STATUS RULE
-            let serviceStatus = "stopped";
+        const nodeOnline =
+            lastNodeHB &&
+            now - parseTS(lastNodeHB.timestamp).getTime() < 2 * 60 * 1000;
 
-            if (
-                s &&
-                now - s.ts < 3 * 60 * 1000 &&
-                s.service_status === "running"
-            ) {
-                serviceStatus = "running";
-            }
+        /* ---- MEDIA SERVICE ---- */
+        const media = logs
+            .filter(l =>
+                l.boxCode === boxCode &&
+                l.type === "service_status" &&
+                l.service_name === "mediaserver.service"
+            )
+            .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp))[0];
 
-            rows.push({
-                service_name: service,
-                online_status: boxOnline ? "online" : "offline",
-                service_status: serviceStatus,
-                last_heartbeat: hb ? hb.timestamp : "-"
-            });
-        });
+        const mediaRunning =
+            media &&
+            now - parseTS(media.timestamp).getTime() < 3 * 60 * 1000 &&
+            media.service_status === "running";
+
+        /* ---- AI SERVER ---- */
+        const aiServer = logs
+            .filter(l =>
+                l.boxCode === boxCode &&
+                l.type === "service_status" &&
+                l.service_name === "aiserver.service"
+            )
+            .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp))[0];
+
+        const aiServerRunning =
+            aiServer &&
+            now - parseTS(aiServer.timestamp).getTime() < 3 * 60 * 1000 &&
+            aiServer.service_status === "running";
+
+        return {
+            site: boxCode,
+            aiBoxStatus: boxOnline ? "online" : "offline",
+            aiBoxLast: lastBoxHB ? lastBoxHB.timestamp : "-",
+
+            mediaStatus: mediaRunning ? "running" : "stopped",
+            mediaLast: media ? media.timestamp : "-",
+
+            aiServerStatus: aiServerRunning ? "running" : "stopped",
+            aiServerLast: aiServer ? aiServer.timestamp : "-",
+
+            nodeStatus: nodeOnline ? "online" : "offline",
+            nodeLast: lastNodeHB ? lastNodeHB.timestamp : "-"
+        };
     });
 
-    res.json(rows.map((r, i) => ({ no: i + 1, ...r })));
+    res.json(rows);
 });
 
 /* ================= AI BOX STATUS HISTORY ================= */
