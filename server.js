@@ -154,11 +154,17 @@ app.get("/stats", (req, res) => {
 app.post("/nodered/heartbeat", (req, res) => {
     const now = Date.now();
     const ip = req.ip.replace("::ffff:", "");
+    const { boxCode } = req.body;
 
-    console.log(`NODE-RED HB | ${ip} | ${formatTime(now)}`);
+    if (!boxCode) {
+        return res.status(400).json({ error: "Missing boxCode" });
+    }
+
+    console.log(`NODE-RED HB | ${boxCode} | ${ip} | ${formatTime(now)}`);
 
     saveLog({
         timestamp: formatTime(now),
+        boxCode,
         source: "NODE_RED",
         ip,
         type: "heartbeat"
