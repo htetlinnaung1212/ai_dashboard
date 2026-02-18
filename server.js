@@ -309,6 +309,11 @@ app.get("/boxes", (req, res) => {
 
     res.json(rows);
 });
+app.get("/debug-files", (req, res) => {
+    const files = fs.readdirSync(__dirname);
+    res.json(files);
+});
+
 
 /* ================= AI BOX STATUS HISTORY ================= */
 app.get("/logs", (req, res) => {
