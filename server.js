@@ -176,6 +176,7 @@ app.post("/nodered/heartbeat", (req, res) => {
     res.json({ ok: true });
 });
 
+
 /* =================================================
    PART 3 — SERVICE STATUS (FROM NODE-RED)
    ================================================= */
@@ -206,26 +207,7 @@ app.post("/service-status", (req, res) => {
     res.json({ ok: true });
 });
 
-/* ================= NODE-RED STATUS ================= */
-app.post("/nodered/heartbeat", (req, res) => {
-    const now = Date.now();
-    const ip = req.ip.replace("::ffff:", "");
-    const { boxCode } = req.body;
 
-    if (!boxCode) {
-        return res.status(400).json({ error: "Missing boxCode" });
-    }
-
-    saveLog({
-        timestamp: formatTime(now),
-        boxCode,
-        source: "NODE_RED",
-        ip,
-        type: "heartbeat"
-    });
-
-    res.json({ ok: true });
-});
 
 /* ================= AI BOX LIVE STATUS ================= */
 app.get("/boxes", (req, res) => {
