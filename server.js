@@ -198,26 +198,24 @@ app.post("/service-status", (req, res) => {
 });
 
 /* ================= NODE-RED STATUS ================= */
-app.get("/nodered/status", (req, res) => {
-    const logs = readLogs().filter(
-        l => l.source === "NODE_RED" && l.type === "heartbeat"
-    );
+app.post("/nodered/heartbeat", (req, res) => {
+    const now = Date.now();
+    const ip = req.ip.replace("::ffff:", "");
+    const { boxCode } = req.body;
 
-    if (!logs.length) {
-        return res.json({ online: false, last_heartbeat: null });
+    if (!boxCode) {
+        return res.status(400).json({ error: "Missing boxCode" });
     }
 
-    const last = logs.sort(
-        (a, b) => parseTS(b.timestamp) - parseTS(a.timestamp)
-    )[0];
-
-    const online =
-        Date.now() - parseTS(last.timestamp).getTime() < HEARTBEAT_TIMEOUT;
-
-    res.json({
-        online,
-        last_heartbeat: last.timestamp
+    saveLog({
+        timestamp: formatTime(now),
+        boxCode,
+        source: "NODE_RED",
+        ip,
+        type: "heartbeat"
     });
+
+    res.json({ ok: true });
 });
 
 /* ================= AI BOX LIVE STATUS ================= */
