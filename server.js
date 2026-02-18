@@ -5,7 +5,8 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 const LOG_FILE = path.join(__dirname, "status_log.json");
 const HEARTBEAT_TIMEOUT = 4 * 60 * 1000;
 
@@ -389,3 +390,4 @@ app.use(express.static("public"));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
