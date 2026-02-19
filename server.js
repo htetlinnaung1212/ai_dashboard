@@ -188,10 +188,6 @@ app.post("/service-status", (req, res) => {
         return res.status(400).json({ error: "Invalid payload" });
     }
 
-    // console.log(`\nSERVICE STATUS | ${boxCode}`);
-    // services.forEach(s => {
-    //     console.log(`  ${s.service_name} → ${s.status}`);
-    // });
 
     services.forEach(s => {
         saveLog({
@@ -388,7 +384,7 @@ setInterval(() => {
                 online_status: "offline",
                 type: "status_change"
             });
-
+  
             console.log(`AI BOX STATUS: ${boxCode} ONLINE → OFFLINE`);
         }
     });
