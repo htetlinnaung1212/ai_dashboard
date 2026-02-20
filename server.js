@@ -294,7 +294,10 @@ app.get("/debug-files", (req, res) => {
     const files = fs.readdirSync(__dirname);
     res.json(files);
 });
-
+app.get("/heartbeat", (req, res) => {
+    console.log("AI BOX GET RECEIVED:", req.query);
+    res.send("GET OK");
+});
 
 /* ================= AI BOX STATUS HISTORY ================= */
 app.get("/logs", (req, res) => {
