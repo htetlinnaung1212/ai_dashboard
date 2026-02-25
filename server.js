@@ -348,7 +348,7 @@ app.get("/logs", (req, res) => {
 /* ================= OFFLINE CHECKER (AI BOX ONLY) ================= */
 setInterval(() => {
     const logs = readLogs();
-
+ 
     // get unique box codes
     const boxCodes = [...new Set(
         logs
