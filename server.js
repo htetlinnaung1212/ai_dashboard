@@ -3,6 +3,24 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
+require("dotenv").config();
+const mongoose = require("mongoose");
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.error("❌ MongoDB Error:", err));
+  const logSchema = new mongoose.Schema({
+  timestamp: String,
+  boxCode: String,
+  source: String,
+  ip: String,
+  online_status: String,
+  service_name: String,
+  service_status: String,
+  type: String
+});
+
+const Log = mongoose.model("Log", logSchema);
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -32,15 +50,11 @@ function parseTS(ts) {
     return new Date(`${yyyy}-${mm}-${dd}T${t}`);
 }
 
-function readLogs() {
-    if (!fs.existsSync(LOG_FILE)) fs.writeFileSync(LOG_FILE, "[]");
-    return JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
+async function readLogs() {
+    return await Log.find();
 }
-
-function saveLog(entry) {
-    const logs = readLogs();
-    logs.push(entry);
-    fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
+async function saveLog(entry) {
+    await Log.create(entry);
 }
 function getServiceStatusAt(boxCode) {
     const logs = readLogs()
