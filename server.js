@@ -6,9 +6,7 @@ const app = express();
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Error:", err));
+
   const logSchema = new mongoose.Schema({
   timestamp: String,
   boxCode: String,
@@ -412,7 +410,15 @@ setInterval(async() => {
 
 /* ================= START ================= */
 app.use(express.static("public"));
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log(" MongoDB Connected");
 
+    app.listen(PORT, () => {
+      console.log(` Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error(" MongoDB Error:", err);
+    process.exit(1);
+  });
