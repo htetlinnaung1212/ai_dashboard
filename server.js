@@ -197,27 +197,36 @@ app.get("/boxes", async (req, res) => {
 
       rows.push({
         site: boxCode,
+
         aiBoxStatus:
           lastBoxHB &&
           now - parseTS(lastBoxHB.timestamp).getTime() < HEARTBEAT_TIMEOUT
             ? "online"
             : "offline",
 
+        aiBoxLast: lastBoxHB ? lastBoxHB.timestamp : "-",
+
         mediaStatus:
           media && media.service_status === "running"
             ? "running"
             : "stopped",
+
+        mediaLast: media ? media.timestamp : "-",
 
         aiServerStatus:
           aiServer && aiServer.service_status === "running"
             ? "running"
             : "stopped",
 
+        aiServerLast: aiServer ? aiServer.timestamp : "-",
+
         nodeStatus:
           lastNodeHB &&
           now - parseTS(lastNodeHB.timestamp).getTime() < 2 * 60 * 1000
             ? "online"
-            : "offline"
+            : "offline",
+
+        nodeLast: lastNodeHB ? lastNodeHB.timestamp : "-"
       });
     }
 
