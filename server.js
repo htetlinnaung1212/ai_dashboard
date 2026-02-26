@@ -361,52 +361,63 @@ app.get("/logs", async (req, res) => {
 });
 
 /* ================= OFFLINE CHECKER (AI BOX ONLY) ================= */
-setInterval(async() => {
-    const logs = await readLogs();
- 
-    // get unique box codes
-    const boxCodes = [...new Set(
-        logs
-            .filter(l => l.source === "AI_BOX")
-            .map(l => l.boxCode)
-    )];
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB Connected");
 
-    boxCodes.forEach(async boxCode => {
-        const boxLogs = logs.filter(
-            l => l.boxCode === boxCode && l.source === "AI_BOX"
-        );
+    // START INTERVAL AFTER CONNECT
+    setInterval(async () => {
+        const logs = await readLogs();
 
-        const lastHeartbeat = [...boxLogs]
-            .reverse()
-            .find(l => l.type === "heartbeat");
+        const boxCodes = [...new Set(
+            logs
+                .filter(l => l.source === "AI_BOX")
+                .map(l => l.boxCode)
+        )];
 
-        const lastStatus = [...boxLogs]
-            .reverse()
-            .find(l => l.type === "status_change");
+        for (const boxCode of boxCodes) {
+            const boxLogs = logs.filter(
+                l => l.boxCode === boxCode && l.source === "AI_BOX"
+            );
 
-        // nothing to check yet
-        if (!lastHeartbeat || !lastStatus) return;
+            const lastHeartbeat = [...boxLogs]
+                .reverse()
+                .find(l => l.type === "heartbeat");
 
-        const lastHBTime = parseTS(lastHeartbeat.timestamp).getTime();
+            const lastStatus = [...boxLogs]
+                .reverse()
+                .find(l => l.type === "status_change");
 
-        //  ONLINE → OFFLINE
-        if (
-            lastStatus.online_status === "online" &&
-            Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
-        ) {
-            await saveLog({
-                timestamp: formatTime(Date.now()),
-                boxCode,
-                ip: lastHeartbeat.ip,
-                source: "AI_BOX",
-                online_status: "offline",
-                type: "status_change"
-            });
-  
-            console.log(`AI BOX STATUS: ${boxCode} ONLINE → OFFLINE`);
+            if (!lastHeartbeat || !lastStatus) continue;
+
+            const lastHBTime = parseTS(lastHeartbeat.timestamp).getTime();
+
+            if (
+                lastStatus.online_status === "online" &&
+                Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
+            ) {
+                await saveLog({
+                    timestamp: formatTime(Date.now()),
+                    boxCode,
+                    ip: lastHeartbeat.ip,
+                    source: "AI_BOX",
+                    online_status: "offline",
+                    type: "status_change"
+                });
+
+                console.log(`AI BOX STATUS: ${boxCode} ONLINE → OFFLINE`);
+            }
         }
+    }, 5000);
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
-}, 5000);
+  })
+  .catch(err => {
+    console.error("MongoDB Error:", err);
+    process.exit(1);
+  });
 
 /* ================= START ================= */
 app.use(express.static("public"));
