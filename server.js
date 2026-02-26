@@ -279,7 +279,7 @@ async function startOfflineChecker() {
 /* =================================================
    START SERVER
 ================================================= */
-
+app.use(express.static("public"));
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB Connected");
