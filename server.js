@@ -17,7 +17,7 @@ const mongoose = require("mongoose");
   service_status: String,
   type: String
 });
-
+console.log("Render MONGO_URI:", process.env.MONGO_URI);
 const Log = mongoose.model("Log", logSchema);
 app.use(express.json());
 
