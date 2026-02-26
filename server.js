@@ -72,7 +72,9 @@ async function getServiceStatusAt(boxCode) {
 }
 
 
-
+app.get("/", (req, res) => {
+  res.send("AI Dashboard Backend Running ✅");
+});
 
 /* =================================================
    PART 1 — AI BOX HEARTBEAT
