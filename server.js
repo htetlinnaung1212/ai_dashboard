@@ -48,9 +48,7 @@ async function saveLog(entry) {
 
 /* ================= ROOT ================= */
 
-app.get("/", (req, res) => {
-  res.send("AI Dashboard Backend Running ✅");
-});
+
 
 /* =================================================
    AI BOX HEARTBEAT
