@@ -420,16 +420,3 @@ mongoose.connect(process.env.MONGO_URI)
   });
 
 /* ================= START ================= */
-app.use(express.static("public"));
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log(" MongoDB Connected");
-
-    app.listen(PORT, () => {
-      console.log(` Server running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error(" MongoDB Error:", err);
-    process.exit(1);
-  });
