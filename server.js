@@ -56,17 +56,19 @@ async function readLogs() {
 async function saveLog(entry) {
     await Log.create(entry);
 }
-function getServiceStatusAt(boxCode) {
-    const logs = readLogs()
+async function getServiceStatusAt(boxCode) {
+    const logs = await readLogs();
+
+    const filtered = logs
         .filter(l =>
             l.type === "service_status" &&
             l.boxCode === boxCode
         )
         .sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp));
 
-    if (!logs.length) return "-";
+    if (!filtered.length) return "-";
 
-    return logs.map(l =>
+    return filtered.map(l =>
         `${l.service_name}: ${l.service_status}`
     ).join(", ");
 }
@@ -77,7 +79,7 @@ function getServiceStatusAt(boxCode) {
 /* =================================================
    PART 1 — AI BOX HEARTBEAT
    ================================================= */
-app.post("/heartbeat", (req, res) => {
+app.post("/heartbeat", async (req, res) => {
     const now = Date.now();
     const ip = req.ip.replace("::ffff:", "");
     const boxCode = req.body?.boxCode || "Unknown";
@@ -95,7 +97,7 @@ app.post("/heartbeat", (req, res) => {
     });
 
     // detect OFFLINE → ONLINE
-    const logs = readLogs().filter(
+    const logs = (await readLogs()).filter(
         l => l.boxCode === boxCode && l.source === "AI_BOX"
     );
 
@@ -119,50 +121,50 @@ app.post("/heartbeat", (req, res) => {
     res.json({ ok: true });
 });
 
-app.get("/stats", (req, res) => {
-    const { boxCode, from, to } = req.query;
-    const logs = readLogs();
+app.get("/stats", async function (req, res) {
+        const { boxCode, from, to } = req.query;
+        const logs = await readLogs();
 
 
-    const heartbeats = logs.filter(l => {
-        if (l.type !== "heartbeat") return false;
-        if (l.source !== "AI_BOX") return false;
-        if (boxCode && l.boxCode !== boxCode) return false;
+        const heartbeats = logs.filter(l => {
+            if (l.type !== "heartbeat") return false;
+            if (l.source !== "AI_BOX") return false;
+            if (boxCode && l.boxCode !== boxCode) return false;
 
-        if (from || to) {
-            const t = parseTS(l.timestamp);
-            if (from && t < new Date(from + "T00:00:00")) return false;
-            if (to && t > new Date(to + "T23:59:59")) return false;
+            if (from || to) {
+                const t = parseTS(l.timestamp);
+                if (from && t < new Date(from + "T00:00:00")) return false;
+                if (to && t > new Date(to + "T23:59:59")) return false;
+            }
+            return true;
+        });
+
+        // STATUS CHANGES (for duration only)
+        const statusLogs = logs
+            .filter(l => l.type === "status_change" && l.source === "AI_BOX")
+            .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
+
+        let totalOnlineMs = 0;
+        let totalOfflineMs = 0;
+
+        for (let i = 0; i < statusLogs.length - 1; i++) {
+            const start = parseTS(statusLogs[i].timestamp);
+            const end = parseTS(statusLogs[i + 1].timestamp);
+            const diff = end - start;
+
+            if (statusLogs[i].online_status === "online") {
+                totalOnlineMs += diff;
+            } else {
+                totalOfflineMs += diff;
+            }
         }
-        return true;
+
+        res.json({
+            totalHeartbeats: heartbeats.length,
+            totalOnlineMs,
+            totalOfflineMs
+        });
     });
-
-    // STATUS CHANGES (for duration only)
-    const statusLogs = logs
-        .filter(l => l.type === "status_change" && l.source === "AI_BOX")
-        .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
-
-    let totalOnlineMs = 0;
-    let totalOfflineMs = 0;
-
-    for (let i = 0; i < statusLogs.length - 1; i++) {
-        const start = parseTS(statusLogs[i].timestamp);
-        const end = parseTS(statusLogs[i + 1].timestamp);
-        const diff = end - start;
-
-        if (statusLogs[i].online_status === "online") {
-            totalOnlineMs += diff;
-        } else {
-            totalOfflineMs += diff;
-        }
-    }
-
-    res.json({
-        totalHeartbeats: heartbeats.length,
-        totalOnlineMs,
-        totalOfflineMs
-    });
-});
 
 
 /* =================================================
@@ -220,8 +222,8 @@ app.post("/service-status", (req, res) => {
 
 
 /* ================= AI BOX LIVE STATUS ================= */
-app.get("/boxes", (req, res) => {
-    const logs = readLogs();
+app.get("/boxes",async (req, res) => {
+    const logs = await readLogs();
     const now = Date.now();
 
     const boxes = [...new Set(
@@ -308,19 +310,20 @@ app.get("/debug-files", (req, res) => {
     const files = fs.readdirSync(__dirname);
     res.json(files);
 });
-app.get("/heartbeat", (req, res) => {
+app.get("/heartbeat",
+(req, res) => {
     console.log("AI BOX GET RECEIVED:", req.query);
     res.send("GET OK");
 });
 
 /* ================= AI BOX STATUS HISTORY ================= */
-app.get("/logs", (req, res) => {
-    let logs = readLogs();
+app.get("/logs", async (req, res) => {
+    let logs = await readLogs();
 
     const { boxCode, from, to } = req.query;
 
     // only AI BOX status changes
-    let statusLogs = logs.filter(
+    let statusLogs =  logs.filter(
         l => l.source === "AI_BOX" && l.type === "status_change"
     );
 
@@ -360,8 +363,8 @@ app.get("/logs", (req, res) => {
 });
 
 /* ================= OFFLINE CHECKER (AI BOX ONLY) ================= */
-setInterval(() => {
-    const logs = readLogs();
+setInterval(async() => {
+    const logs = await readLogs();
  
     // get unique box codes
     const boxCodes = [...new Set(
@@ -370,7 +373,7 @@ setInterval(() => {
             .map(l => l.boxCode)
     )];
 
-    boxCodes.forEach(boxCode => {
+    boxCodes.forEach(async boxCode => {
         const boxLogs = logs.filter(
             l => l.boxCode === boxCode && l.source === "AI_BOX"
         );
@@ -393,7 +396,7 @@ setInterval(() => {
             lastStatus.online_status === "online" &&
             Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
         ) {
-            saveLog({
+            await saveLog({
                 timestamp: formatTime(Date.now()),
                 boxCode,
                 ip: lastHeartbeat.ip,
