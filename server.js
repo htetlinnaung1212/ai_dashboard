@@ -46,7 +46,24 @@ async function saveLog(entry) {
   await Log.create(entry);
 }
 
-/* ================= ROOT ================= */
+app.get("/logs", async (req, res) => {
+  try {
+    const { boxCode, from, to } = req.query;
+
+    let query = { source: "AI_BOX", type: "status_change" };
+
+    if (boxCode) {
+      query.boxCode = boxCode;
+    }
+
+    const logs = await Log.find(query).sort({ _id: -1 });
+
+    res.json(logs);
+  } catch (err) {
+    console.error("Logs Error:", err);
+    res.status(500).json({ error: "Failed to fetch logs" });
+  }
+});
 
 
 
