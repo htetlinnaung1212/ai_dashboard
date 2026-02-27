@@ -349,11 +349,13 @@ async function startOfflineChecker() {
 
       if (!lastHeartbeat || !lastStatus) continue;
 
-      const lastHBTime = lastHeartbeat.timestamp.getTime();
+     const lastHBTime = lastHeartbeat.timestamp
+  ? new Date(lastHeartbeat.timestamp).getTime()
+  : null;
 
       if (
         lastStatus.online_status === "online" &&
-        Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
+       lastHBTime && Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
       ) {
         await saveLog({
           timestamp: new Date(),
@@ -389,11 +391,13 @@ async function startOfflineChecker() {
 
       if (!lastHeartbeat || !lastStatus) continue;
 
-      const lastHBTime = lastHeartbeat.timestamp.getTime();
+      const lastHBTime = lastHeartbeat.timestamp
+  ? new Date(lastHeartbeat.timestamp).getTime()
+  : null;
 
       if (
         lastStatus.online_status === "online" &&
-        Date.now() - lastHBTime > 2 * 60 * 1000
+      lastHBTime && Date.now() - lastHBTime > 2 * 60 * 1000
       ) {
         await saveLog({
           timestamp: new Date(),
