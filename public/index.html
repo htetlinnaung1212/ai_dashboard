@@ -88,7 +88,7 @@
             max-width: 1100px;
             margin: auto;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
 
@@ -146,21 +146,67 @@
     <div class="divider"></div>
 
     <!-- ================= SUMMARY ================= -->
-    <div class="summary">
+    <div class="divider"></div>
+
+    <h2 style="text-align:center;">AI Box Summary</h2>
+    <div class="summary" id="aiSummary">
+
         <div class="summary-card">
             <div>Total Heartbeats</div>
-            <div class="value" id="totalHeartbeats">0</div>
+            <div class="value" id="aiTotalHB">0</div>
         </div>
+
         <div class="summary-card">
-            <div>Total Online Duration</div>
-            <div class="value" id="totalOnline">0m</div>
+            <div>Online Duration</div>
+            <div class="value" id="aiOnlineDuration">0m</div>
         </div>
+
         <div class="summary-card">
-            <div>Total Offline Duration</div>
-            <div class="value" id="totalOffline">0m</div>
+            <div>Offline Duration</div>
+            <div class="value" id="aiOfflineDuration">0m</div>
         </div>
+
     </div>
 
+    <div class="divider"></div>
+
+    <h2 style="text-align:center;">Node-RED Summary</h2>
+    <div class="summary" id="nodeSummary">
+
+        <div class="summary-card">
+            <div>Total Heartbeats</div>
+            <div class="value" id="nodeTotalHB">0</div>
+        </div>
+
+        <div class="summary-card">
+            <div>Online Duration</div>
+            <div class="value" id="nodeOnlineDuration">0m</div>
+        </div>
+
+        <div class="summary-card">
+            <div>Offline Duration</div>
+            <div class="value" id="nodeOfflineDuration">0m</div>
+        </div>
+
+    </div>
+    <div class="divider"></div>
+    <div style="max-width:1100px;margin:20px auto;text-align:center;">
+
+        <select id="typeFilter">
+            <option value="ALL">All</option>
+            <option value="AI_BOX">AI Box</option>
+            <option value="NODE_RED">Node-RED</option>
+        </select>
+        <input type="text" id="boxCodeFilter" placeholder="Box Code">
+        <input type="text" id="ipFilter" placeholder="IP Address">
+
+        <input type="datetime-local" id="fromFilter">
+        <input type="datetime-local" id="toFilter">
+
+        <button onclick="applyFilter()">Apply Filter</button>
+        <button onclick="resetFilter()">Reset</button>
+
+    </div>
     <div class="divider"></div>
 
     <!-- ================= HISTORY ================= -->
@@ -171,6 +217,7 @@
             <thead>
                 <tr>
                     <th>Box Code</th>
+                    <th>Type</th>
                     <th>Online Status</th>
                     <th>Date & Time</th>
                     <th>Duration</th>
@@ -178,7 +225,7 @@
             </thead>
             <tbody id="logTable">
                 <tr>
-                    <td colspan="4">Loading...</td>
+                    <td colspan="5">Loading...</td>
                 </tr>
             </tbody>
         </table>
@@ -199,37 +246,129 @@
             if (m) return `${m}m ${s % 60}s`;
             return `${s}s`;
         }
+        async function loadLogs() {
 
-        async function loadLiveStatus() {
-            const res = await fetch("/boxes");
-            const data = await res.json();
+            const type = document.getElementById("typeFilter").value;
+            const ip = document.getElementById("ipFilter").value;
+            const from = document.getElementById("fromFilter").value;
+            const to = document.getElementById("toFilter").value;
 
-            liveTable.innerHTML = data.map((row, i) => `
-            <tr>
-                <td>${i + 1}</td>
-                <td>${row.site}</td>
+            const res = await fetch(
+                `/logs?type=${type}&ip=${ip}&boxCode=${boxCode}&from=${from}&to=${to}`
+            );
 
-                <td class="${row.aiBoxStatus}">
-                    ${row.aiBoxStatus}
-                </td>
-                <td>${row.aiBoxLast}</td>
+            const logs = await res.json();
 
-                <td class="${row.mediaStatus}">
-                    ${row.mediaStatus}
-                </td>
-                <td>${row.mediaLast}</td>
+            document.getElementById("logTable").innerHTML = logs.map(log => `
+        <tr>
+            <td>${log.boxCode}</td>
+            <td>${log.source}</td>
+            <td class="${log.online_status}">
+                ${log.online_status}
+            </td>
+            <td>${log.timestamp}</td>
+            <td>-</td>
+        </tr>
+    `).join("");
+        }
 
-                <td class="${row.aiServerStatus}">
-                    ${row.aiServerStatus}
-                </td>
-                <td>${row.aiServerLast}</td>
+        async function loadStats() {
 
-                <td class="${row.nodeStatus}">
-                    ${row.nodeStatus}
-                </td>
-                <td>${row.nodeLast}</td>
-            </tr>
-        `).join("");
+            const type = document.getElementById("typeFilter").value;
+            const ip = document.getElementById("ipFilter").value;
+            const boxCode = document.getElementById("boxCodeFilter").value;
+            const from = document.getElementById("fromFilter").value;
+            const to = document.getElementById("toFilter").value;
+
+            const res = await fetch(
+                `/logs?type=${type}&ip=${ip}&from=${from}&to=${to}`
+            );
+
+            const logs = await res.json();
+
+            // Separate logs
+            const aiLogs = logs
+                .filter(l => l.source === "AI_BOX")
+                .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
+
+            const nodeLogs = logs
+                .filter(l => l.source === "NODE_RED")
+                .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
+
+            function calculateStats(filteredLogs) {
+
+                let total = filteredLogs.length;
+                let onlineDuration = 0;
+                let offlineDuration = 0;
+
+                for (let i = 0; i < filteredLogs.length - 1; i++) {
+
+                    const current = filteredLogs[i];
+                    const next = filteredLogs[i + 1];
+
+                    const currentTime = parseTS(current.timestamp).getTime();
+                    const nextTime = parseTS(next.timestamp).getTime();
+
+                    const diff = nextTime - currentTime;
+
+                    if (current.online_status === "online")
+                        onlineDuration += diff;
+
+                    if (current.online_status === "offline")
+                        offlineDuration += diff;
+                }
+
+                // Add duration until NOW if last state exists
+                if (filteredLogs.length > 0) {
+                    const last = filteredLogs[filteredLogs.length - 1];
+                    const lastTime = parseTS(last.timestamp).getTime();
+                    const now = Date.now();
+                    const diff = now - lastTime;
+
+                    if (last.online_status === "online")
+                        onlineDuration += diff;
+
+                    if (last.online_status === "offline")
+                        offlineDuration += diff;
+                }
+
+                return {
+                    total,
+                    onlineDuration,
+                    offlineDuration
+                };
+            }
+
+            const aiStats = calculateStats(aiLogs);
+            const nodeStats = calculateStats(nodeLogs);
+
+            // Update AI cards
+            document.getElementById("aiTotalHB").innerText = aiStats.total;
+            document.getElementById("aiOnlineDuration").innerText =
+                formatDuration(aiStats.onlineDuration);
+            document.getElementById("aiOfflineDuration").innerText =
+                formatDuration(aiStats.offlineDuration);
+
+            // Update Node cards
+            document.getElementById("nodeTotalHB").innerText = nodeStats.total;
+            document.getElementById("nodeOnlineDuration").innerText =
+                formatDuration(nodeStats.onlineDuration);
+            document.getElementById("nodeOfflineDuration").innerText =
+                formatDuration(nodeStats.offlineDuration);
+        }
+        function resetFilter() {
+            document.getElementById("typeFilter").value = "ALL";
+            document.getElementById("boxCodeFilter").value = "";
+            document.getElementById("ipFilter").value = "";
+            document.getElementById("fromFilter").value = "";
+            document.getElementById("toFilter").value = "";
+
+            loadLogs();
+            loadStats();
+        }
+        function applyFilter() {
+            loadLogs();
+            loadStats();
         }
 
         loadLiveStatus();

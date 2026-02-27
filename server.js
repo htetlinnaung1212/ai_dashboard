@@ -48,17 +48,45 @@ async function saveLog(entry) {
 
 app.get("/logs", async (req, res) => {
   try {
-    const { boxCode, from, to } = req.query;
+   const { type, ip, from, to, boxCode } = req.query;
 
-    let query = { source: "AI_BOX", type: "status_change" };
+    let query = {
+  type: "status_change"
+};
 
-    if (boxCode) {
-      query.boxCode = boxCode;
+if (type && type !== "ALL") {
+  query.source = type;
+}
+
+if (ip && ip.trim() !== "") {
+  query.ip = ip.trim();
+}
+
+if (boxCode && boxCode.trim() !== "") {
+  query.boxCode = boxCode.trim();
+}
+
+   const logs = await Log.find(query)
+  .sort({ _id: -1 })
+  .limit(1000);
+
+    // TIME FILTER (done after fetch because timestamp is string)
+    let filteredLogs = logs;
+
+    if (from || to) {
+      filteredLogs = logs.filter(log => {
+        const logTime = parseTS(log.timestamp).getTime();
+        const fromTime = from ? new Date(from).getTime() : null;
+        const toTime = to ? new Date(to).getTime() : null;
+
+        if (fromTime && logTime < fromTime) return false;
+        if (toTime && logTime > toTime) return false;
+
+        return true;
+      });
     }
 
-    const logs = await Log.find(query).sort({ _id: -1 });
-
-    res.json(logs);
+    res.json(filteredLogs);
   } catch (err) {
     console.error("Logs Error:", err);
     res.status(500).json({ error: "Failed to fetch logs" });
@@ -135,8 +163,28 @@ app.post("/nodered/heartbeat", async (req, res) => {
       boxCode,
       source: "NODE_RED",
       ip,
+      online_status: "online",
       type: "heartbeat"
     });
+
+    const lastStatus = await Log.findOne({
+      boxCode,
+      source: "NODE_RED",
+      type: "status_change"
+    }).sort({ _id: -1 });
+
+    if (!lastStatus || lastStatus.online_status === "offline") {
+      await saveLog({
+        timestamp: formatTime(now),
+        boxCode,
+        ip,
+        source: "NODE_RED",
+        online_status: "online",
+        type: "status_change"
+      });
+
+      console.log(`NODE-RED STATUS: ${boxCode} OFFLINE → ONLINE`);
+    }
 
     res.json({ ok: true });
   } catch (err) {
@@ -260,6 +308,9 @@ app.get("/boxes", async (req, res) => {
 
 async function startOfflineChecker() {
   setInterval(async () => {
+
+    /* ================= AI BOX CHECK ================= */
+
     const boxCodes = await Log.distinct("boxCode", {
       source: "AI_BOX"
     });
@@ -297,6 +348,47 @@ async function startOfflineChecker() {
         console.log(`AI BOX STATUS: ${boxCode} ONLINE → OFFLINE`);
       }
     }
+
+    /* ================= NODE-RED CHECK ================= */
+
+    const nodeBoxes = await Log.distinct("boxCode", {
+      source: "NODE_RED"
+    });
+
+    for (const boxCode of nodeBoxes) {
+      const lastHeartbeat = await Log.findOne({
+        boxCode,
+        source: "NODE_RED",
+        type: "heartbeat"
+      }).sort({ _id: -1 });
+
+      const lastStatus = await Log.findOne({
+        boxCode,
+        source: "NODE_RED",
+        type: "status_change"
+      }).sort({ _id: -1 });
+
+      if (!lastHeartbeat || !lastStatus) continue;
+
+      const lastHBTime = parseTS(lastHeartbeat.timestamp).getTime();
+
+      if (
+        lastStatus.online_status === "online" &&
+        Date.now() - lastHBTime > 2 * 60 * 1000
+      ) {
+        await saveLog({
+          timestamp: formatTime(Date.now()),
+          boxCode,
+          ip: lastHeartbeat.ip,
+          source: "NODE_RED",
+          online_status: "offline",
+          type: "status_change"
+        });
+
+        console.log(`NODE-RED STATUS: ${boxCode} ONLINE → OFFLINE`);
+      }
+    }
+
   }, 5000);
 }
 
@@ -317,4 +409,4 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => {
     console.error("MongoDB Error:", err);
     process.exit(1);
-  });
+  }); 
