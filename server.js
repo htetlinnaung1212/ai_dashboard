@@ -48,7 +48,7 @@ async function saveLog(entry) {
 
 app.get("/logs", async (req, res) => {
   try {
-   const { type, ip, from, to, boxCode } = req.query;
+   const { type, from, to, boxCode } = req.query;
 
     let query = {
   type: "status_change"
@@ -58,9 +58,6 @@ if (type && type !== "ALL") {
   query.source = type;
 }
 
-if (ip && ip.trim() !== "") {
-  query.ip = ip.trim();
-}
 
 if (boxCode && boxCode.trim() !== "") {
   query.boxCode = boxCode.trim();
@@ -98,13 +95,9 @@ app.get("/filters", async (req, res) => {
       boxCode: { $ne: null }
     });
 
-    const ips = await Log.distinct("ip", {
-      ip: { $ne: null }
-    });
 
     res.json({
       boxCodes,
-      ips
     });
   } catch (err) {
     console.error("Filter load error:", err);
