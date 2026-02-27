@@ -239,28 +239,23 @@ app.post("/service-status", async (req, res) => {
 app.get("/boxes", async (req, res) => {
   try {
     const now = Date.now();
-
     const boxCodes = await Log.distinct("boxCode");
-
     const rows = [];
 
     for (const boxCode of boxCodes) {
 
-      // ================= AI BOX LAST HEARTBEAT =================
       const lastBoxHB = await Log.findOne({
         boxCode,
         source: "AI_BOX",
         type: "heartbeat"
       }).sort({ _id: -1 });
 
-      // ================= NODE-RED LAST HEARTBEAT =================
       const lastNodeHB = await Log.findOne({
         boxCode,
         source: "NODE_RED",
         type: "heartbeat"
       }).sort({ _id: -1 });
 
-      // ================= SERVICE STATUS =================
       const media = await Log.findOne({
         boxCode,
         type: "service_status",
@@ -273,72 +268,46 @@ app.get("/boxes", async (req, res) => {
         service_name: "aiserver.service"
       }).sort({ _id: -1 });
 
-      // ================= SAFE TIME PARSE FUNCTION =================
-      function safeParse(ts) {
-        if (!ts) return null;
-
-        try {
-          const [d, t] = ts.split(" ");
-          const [dd, mm, yyyy] = d.split("/");
-
-          // Force Bangkok timezone (UTC+7)
-          const date = new Date(`${yyyy}-${mm}-${dd}T${t}+07:00`);
-
-          return isNaN(date.getTime()) ? null : date.getTime();
-        } catch {
-          return null;
-        }
-      }
-
-      // ================= AI BOX STATUS =================
       let aiBoxStatus = "offline";
       let aiBoxLast = "-";
 
       if (lastBoxHB) {
-        aiBoxLast = lastBoxHB.timestamp;
+        aiBoxLast = formatTime(lastBoxHB.timestamp);
 
-        const lastTime = safeParse(lastBoxHB.timestamp);
+        const lastTime = lastBoxHB.timestamp.getTime();
 
-        if (lastTime && now - lastTime < HEARTBEAT_TIMEOUT) {
+        if (now - lastTime < HEARTBEAT_TIMEOUT) {
           aiBoxStatus = "online";
         }
       }
 
-      // ================= NODE-RED STATUS =================
       let nodeStatus = "offline";
       let nodeLast = "-";
 
       if (lastNodeHB) {
-        nodeLast = lastNodeHB.timestamp;
+        nodeLast = formatTime(lastNodeHB.timestamp);
 
-        const lastTime = safeParse(lastNodeHB.timestamp);
+        const lastTime = lastNodeHB.timestamp.getTime();
 
-        if (lastTime && now - lastTime < 3 * 60 * 1000) {
+        if (now - lastTime < 3 * 60 * 1000) {
           nodeStatus = "online";
         }
       }
 
-      // ================= PUSH ROW =================
       rows.push({
         site: boxCode,
-
         aiBoxStatus,
         aiBoxLast,
-
         mediaStatus:
           media && media.service_status === "running"
             ? "running"
             : "stopped",
-
-        mediaLast: media ? media.timestamp : "-",
-
+        mediaLast: media ? formatTime(media.timestamp) : "-",
         aiServerStatus:
           aiServer && aiServer.service_status === "running"
             ? "running"
             : "stopped",
-
-        aiServerLast: aiServer ? aiServer.timestamp : "-",
-
+        aiServerLast: aiServer ? formatTime(aiServer.timestamp) : "-",
         nodeStatus,
         nodeLast
       });
