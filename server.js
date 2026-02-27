@@ -13,7 +13,7 @@ const HEARTBEAT_TIMEOUT = 4 * 60 * 1000;
 mongoose.set("bufferCommands", false);
 
 const logSchema = new mongoose.Schema({
-  timestamp: String,
+ timestamp: Date,
   boxCode: String,
   source: String,
   ip: String,
@@ -36,11 +36,7 @@ function formatTime(ts) {
     .replace(",", "");
 }
 
-function parseTS(ts) {
-  const [d, t] = ts.split(" ");
-  const [dd, mm, yyyy] = d.split("/");
-  return new Date(`${yyyy}-${mm}-${dd}T${t}`);
-}
+
 
 async function saveLog(entry) {
   await Log.create(entry);
@@ -72,7 +68,7 @@ if (boxCode && boxCode.trim() !== "") {
 
     if (from || to) {
       filteredLogs = logs.filter(log => {
-        const logTime = parseTS(log.timestamp).getTime();
+       const logTime = new Date(log.timestamp).getTime();
         const fromTime = from ? new Date(from).getTime() : null;
         const toTime = to ? new Date(to).getTime() : null;
 
@@ -120,7 +116,7 @@ app.post("/heartbeat", async (req, res) => {
     console.log(`AI BOX HB | ${boxCode} | ${ip} | ${formatTime(now)}`);
 
     await saveLog({
-      timestamp: formatTime(now),
+      timestamp: new Date(),
       boxCode,
       ip,
       source: "AI_BOX",
@@ -136,7 +132,7 @@ app.post("/heartbeat", async (req, res) => {
 
     if (!lastStatus || lastStatus.online_status === "offline") {
       await saveLog({
-        timestamp: formatTime(now),
+       timestamp: new Date(),
         boxCode,
         ip,
         source: "AI_BOX",
@@ -171,7 +167,7 @@ app.post("/nodered/heartbeat", async (req, res) => {
     console.log(`NODE-RED HB | ${boxCode} | ${ip} | ${formatTime(now)}`);
 
     await saveLog({
-      timestamp: formatTime(now),
+      timestamp: new Date(),
       boxCode,
       source: "NODE_RED",
       ip,
@@ -187,7 +183,7 @@ app.post("/nodered/heartbeat", async (req, res) => {
 
     if (!lastStatus || lastStatus.online_status === "offline") {
       await saveLog({
-        timestamp: formatTime(now),
+        timestamp: new Date(),
         boxCode,
         ip,
         source: "NODE_RED",
@@ -220,7 +216,7 @@ app.post("/service-status", async (req, res) => {
 
     for (const s of services) {
       await saveLog({
-        timestamp: formatTime(now),
+        timestamp: new Date(),
         boxCode,
         source: source || "NODE_RED",
         service_name: s.service_name,
@@ -243,23 +239,28 @@ app.post("/service-status", async (req, res) => {
 app.get("/boxes", async (req, res) => {
   try {
     const now = Date.now();
+
     const boxCodes = await Log.distinct("boxCode");
 
     const rows = [];
 
     for (const boxCode of boxCodes) {
+
+      // ================= AI BOX LAST HEARTBEAT =================
       const lastBoxHB = await Log.findOne({
         boxCode,
         source: "AI_BOX",
         type: "heartbeat"
       }).sort({ _id: -1 });
 
+      // ================= NODE-RED LAST HEARTBEAT =================
       const lastNodeHB = await Log.findOne({
         boxCode,
         source: "NODE_RED",
         type: "heartbeat"
       }).sort({ _id: -1 });
 
+      // ================= SERVICE STATUS =================
       const media = await Log.findOne({
         boxCode,
         type: "service_status",
@@ -272,16 +273,57 @@ app.get("/boxes", async (req, res) => {
         service_name: "aiserver.service"
       }).sort({ _id: -1 });
 
+      // ================= SAFE TIME PARSE FUNCTION =================
+      function safeParse(ts) {
+        if (!ts) return null;
+
+        try {
+          const [d, t] = ts.split(" ");
+          const [dd, mm, yyyy] = d.split("/");
+
+          // Force Bangkok timezone (UTC+7)
+          const date = new Date(`${yyyy}-${mm}-${dd}T${t}+07:00`);
+
+          return isNaN(date.getTime()) ? null : date.getTime();
+        } catch {
+          return null;
+        }
+      }
+
+      // ================= AI BOX STATUS =================
+      let aiBoxStatus = "offline";
+      let aiBoxLast = "-";
+
+      if (lastBoxHB) {
+        aiBoxLast = lastBoxHB.timestamp;
+
+        const lastTime = safeParse(lastBoxHB.timestamp);
+
+        if (lastTime && now - lastTime < HEARTBEAT_TIMEOUT) {
+          aiBoxStatus = "online";
+        }
+      }
+
+      // ================= NODE-RED STATUS =================
+      let nodeStatus = "offline";
+      let nodeLast = "-";
+
+      if (lastNodeHB) {
+        nodeLast = lastNodeHB.timestamp;
+
+        const lastTime = safeParse(lastNodeHB.timestamp);
+
+        if (lastTime && now - lastTime < 3 * 60 * 1000) {
+          nodeStatus = "online";
+        }
+      }
+
+      // ================= PUSH ROW =================
       rows.push({
         site: boxCode,
 
-        aiBoxStatus:
-          lastBoxHB &&
-          now - parseTS(lastBoxHB.timestamp).getTime() < HEARTBEAT_TIMEOUT
-            ? "online"
-            : "offline",
-
-        aiBoxLast: lastBoxHB ? lastBoxHB.timestamp : "-",
+        aiBoxStatus,
+        aiBoxLast,
 
         mediaStatus:
           media && media.service_status === "running"
@@ -297,17 +339,13 @@ app.get("/boxes", async (req, res) => {
 
         aiServerLast: aiServer ? aiServer.timestamp : "-",
 
-        nodeStatus:
-          lastNodeHB &&
-          now - parseTS(lastNodeHB.timestamp).getTime() < 2 * 60 * 1000
-            ? "online"
-            : "offline",
-
-        nodeLast: lastNodeHB ? lastNodeHB.timestamp : "-"
+        nodeStatus,
+        nodeLast
       });
     }
 
     res.json(rows);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Boxes fetch failed" });
