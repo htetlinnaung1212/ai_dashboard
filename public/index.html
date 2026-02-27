@@ -342,7 +342,8 @@
         `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
     );
 
-    const logs = await res.json();
+    const logs = (await res.json())
+  .filter(l => l.type === "status_change");
 
     // Convert timestamp safely
     const normalize = (ts) => {
