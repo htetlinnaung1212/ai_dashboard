@@ -380,14 +380,14 @@ async function startOfflineChecker() {
 
       if (!lastHeartbeat || !lastStatus) continue;
 
-      const lastHBTime = parseTS(lastHeartbeat.timestamp).getTime();
+      const lastHBTime = lastHeartbeat.timestamp.getTime();
 
       if (
         lastStatus.online_status === "online" &&
         Date.now() - lastHBTime > HEARTBEAT_TIMEOUT
       ) {
         await saveLog({
-          timestamp: formatTime(Date.now()),
+          timestamp: new Date(),
           boxCode,
           ip: lastHeartbeat.ip,
           source: "AI_BOX",
@@ -420,14 +420,14 @@ async function startOfflineChecker() {
 
       if (!lastHeartbeat || !lastStatus) continue;
 
-      const lastHBTime = parseTS(lastHeartbeat.timestamp).getTime();
+      const lastHBTime = lastHeartbeat.timestamp.getTime();
 
       if (
         lastStatus.online_status === "online" &&
         Date.now() - lastHBTime > 2 * 60 * 1000
       ) {
         await saveLog({
-          timestamp: formatTime(Date.now()),
+          timestamp: new Date(),
           boxCode,
           ip: lastHeartbeat.ip,
           source: "NODE_RED",
