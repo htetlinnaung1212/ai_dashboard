@@ -333,88 +333,100 @@
 
         async function loadStats() {
 
-            const type = document.getElementById("typeFilter").value;
-           
-            const boxCode = document.getElementById("boxCodeFilter").value;
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
+    const type = document.getElementById("typeFilter").value;
+    const boxCode = document.getElementById("boxCodeFilter").value;
+    const from = document.getElementById("fromFilter").value;
+    const to = document.getElementById("toFilter").value;
 
-            const res = await fetch(
-                `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
-            );
+    const res = await fetch(
+        `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
+    );
 
-            const logs = await res.json();
+    const logs = await res.json();
 
-            // Separate logs
-            const aiLogs = logs
-                .filter(l => l.source === "AI_BOX")
-                .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
+    // Convert timestamp safely
+    const normalize = (ts) => {
+    if (!ts) return null;
 
-            const nodeLogs = logs
-                .filter(l => l.source === "NODE_RED")
-                .sort((a, b) => parseTS(a.timestamp) - parseTS(b.timestamp));
+    const [date, time] = ts.split(" ");
+    const [day, month, year] = date.split("/");
 
-            function calculateStats(filteredLogs) {
+    // Force Bangkok timezone
+    return new Date(`${year}-${month}-${day}T${time}+07:00`);
+};
 
-                let total = filteredLogs.length;
-                let onlineDuration = 0;
-                let offlineDuration = 0;
+    const aiLogs = logs
+        .filter(l => l.source === "AI_BOX")
+        .sort((a, b) => normalize(a.timestamp) - normalize(b.timestamp));
 
-                for (let i = 0; i < filteredLogs.length - 1; i++) {
+    const nodeLogs = logs
+        .filter(l => l.source === "NODE_RED")
+        .sort((a, b) => normalize(a.timestamp) - normalize(b.timestamp));
 
-                    const current = filteredLogs[i];
-                    const next = filteredLogs[i + 1];
+    function calculateStats(filteredLogs) {
 
-                    const currentTime = parseTS(current.timestamp).getTime();
-                    const nextTime = parseTS(next.timestamp).getTime();
+        let total = filteredLogs.length;
+        let onlineDuration = 0;
+        let offlineDuration = 0;
 
-                    const diff = nextTime - currentTime;
+        for (let i = 0; i < filteredLogs.length - 1; i++) {
 
-                    if (current.online_status === "online")
-                        onlineDuration += diff;
+            const current = filteredLogs[i];
+            const next = filteredLogs[i + 1];
 
-                    if (current.online_status === "offline")
-                        offlineDuration += diff;
-                }
+            const currentTime = normalize(current.timestamp)?.getTime();
+            const nextTime = normalize(next.timestamp)?.getTime();
 
-                // Add duration until NOW if last state exists
-                if (filteredLogs.length > 0) {
-                    const last = filteredLogs[filteredLogs.length - 1];
-                    const lastTime = parseTS(last.timestamp).getTime();
-                    const now = Date.now();
-                    const diff = now - lastTime;
+            if (!currentTime || !nextTime) continue;
 
-                    if (last.online_status === "online")
-                        onlineDuration += diff;
+            const diff = Math.max(0, nextTime - currentTime);
 
-                    if (last.online_status === "offline")
-                        offlineDuration += diff;
-                }
+            if (current.online_status === "online")
+                onlineDuration += diff;
 
-                return {
-                    total,
-                    onlineDuration,
-                    offlineDuration
-                };
-            }
-
-            const aiStats = calculateStats(aiLogs);
-            const nodeStats = calculateStats(nodeLogs);
-
-            // Update AI cards
-            document.getElementById("aiTotalHB").innerText = aiStats.total;
-            document.getElementById("aiOnlineDuration").innerText =
-                formatDuration(aiStats.onlineDuration);
-            document.getElementById("aiOfflineDuration").innerText =
-                formatDuration(aiStats.offlineDuration);
-
-            // Update Node cards
-            document.getElementById("nodeTotalHB").innerText = nodeStats.total;
-            document.getElementById("nodeOnlineDuration").innerText =
-                formatDuration(nodeStats.onlineDuration);
-            document.getElementById("nodeOfflineDuration").innerText =
-                formatDuration(nodeStats.offlineDuration);
+            if (current.online_status === "offline")
+                offlineDuration += diff;
         }
+
+        // Add duration until NOW
+        if (filteredLogs.length > 0) {
+            const last = filteredLogs[filteredLogs.length - 1];
+            const lastTime = normalize(last.timestamp)?.getTime();
+            const now = new Date().getTime();
+
+            if (lastTime) {
+                const diff = Math.max(0, now - lastTime);
+
+                if (last.online_status === "online")
+                    onlineDuration += diff;
+
+                if (last.online_status === "offline")
+                    offlineDuration += diff;
+            }
+        }
+
+        return {
+            total,
+            onlineDuration,
+            offlineDuration
+        };
+    }
+
+    const aiStats = calculateStats(aiLogs);
+    const nodeStats = calculateStats(nodeLogs);
+
+    document.getElementById("aiTotalHB").innerText = aiStats.total;
+    document.getElementById("aiOnlineDuration").innerText =
+        formatDuration(aiStats.onlineDuration);
+    document.getElementById("aiOfflineDuration").innerText =
+        formatDuration(aiStats.offlineDuration);
+
+    document.getElementById("nodeTotalHB").innerText = nodeStats.total;
+    document.getElementById("nodeOnlineDuration").innerText =
+        formatDuration(nodeStats.onlineDuration);
+    document.getElementById("nodeOfflineDuration").innerText =
+        formatDuration(nodeStats.offlineDuration);
+}
         function resetFilter() {
             document.getElementById("typeFilter").value = "ALL";
             document.getElementById("boxCodeFilter").value = "";
