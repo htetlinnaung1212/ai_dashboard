@@ -152,7 +152,7 @@
     <div class="summary" id="aiSummary">
 
         <div class="summary-card">
-            <div>Total Heartbeats</div>
+            <div>Total Aiboxes</div>
             <div class="value" id="aiTotalHB">0</div>
         </div>
 
@@ -174,7 +174,7 @@
     <div class="summary" id="nodeSummary">
 
         <div class="summary-card">
-            <div>Total Heartbeats</div>
+            <div>Total Node-red</div>
             <div class="value" id="nodeTotalHB">0</div>
         </div>
 
@@ -197,8 +197,13 @@
             <option value="AI_BOX">AI Box</option>
             <option value="NODE_RED">Node-RED</option>
         </select>
-        <input type="text" id="boxCodeFilter" placeholder="Box Code">
-        <input type="text" id="ipFilter" placeholder="IP Address">
+        <select id="boxCodeFilter">
+    <option value="">All Box Codes</option>
+</select>
+
+<select id="ipFilter">
+    <option value="">All IP Addresses</option>
+</select>
 
         <input type="datetime-local" id="fromFilter">
         <input type="datetime-local" id="toFilter">
@@ -246,20 +251,48 @@
             if (m) return `${m}m ${s % 60}s`;
             return `${s}s`;
         }
-        async function loadLogs() {
+        async function loadFilters() {
+    try {
+        const res = await fetch("/filters");
+        const data = await res.json();
 
-            const type = document.getElementById("typeFilter").value;
-            const ip = document.getElementById("ipFilter").value;
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
+        const boxSelect = document.getElementById("boxCodeFilter");
+        const ipSelect = document.getElementById("ipFilter");
 
-            const res = await fetch(
-                `/logs?type=${type}&ip=${ip}&boxCode=${boxCode}&from=${from}&to=${to}`
-            );
+        // Reset options
+        boxSelect.innerHTML = '<option value="">All Box Codes</option>';
+        ipSelect.innerHTML = '<option value="">All IP Addresses</option>';
 
-            const logs = await res.json();
+        data.boxCodes.forEach(code => {
+            if (code)
+                boxSelect.innerHTML += `<option value="${code}">${code}</option>`;
+        });
 
-            document.getElementById("logTable").innerHTML = logs.map(log => `
+        data.ips.forEach(ip => {
+            if (ip)
+                ipSelect.innerHTML += `<option value="${ip}">${ip}</option>`;
+        });
+
+    } catch (err) {
+        console.error("Failed to load filters:", err);
+    }
+}
+       async function loadLogs() {
+
+    const type = document.getElementById("typeFilter").value;
+    const ip = document.getElementById("ipFilter").value;
+    const boxCode = document.getElementById("boxCodeFilter").value; // 🔥 ADD THIS
+    const from = document.getElementById("fromFilter").value;
+    const to = document.getElementById("toFilter").value;
+
+    const res = await fetch(
+        `/logs?type=${type}&ip=${ip}&boxCode=${boxCode}&from=${from}&to=${to}`
+    );
+
+    const logs = await res.json();
+
+    document.getElementById("logTable").innerHTML =
+        logs.map(log => `
         <tr>
             <td>${log.boxCode}</td>
             <td>${log.source}</td>
@@ -270,7 +303,7 @@
             <td>-</td>
         </tr>
     `).join("");
-        }
+}
         async function loadLiveStatus() {
             const res = await fetch("/boxes");
             const data = await res.json();
@@ -388,31 +421,31 @@
             document.getElementById("nodeOfflineDuration").innerText =
                 formatDuration(nodeStats.offlineDuration);
         }
-        function resetFilter() {
-            document.getElementById("typeFilter").value = "ALL";
-            document.getElementById("boxCodeFilter").value = "";
-            document.getElementById("ipFilter").value = "";
-            document.getElementById("fromFilter").value = "";
-            document.getElementById("toFilter").value = "";
+       function resetFilter() {
+    document.getElementById("typeFilter").value = "ALL";
+    document.getElementById("boxCodeFilter").value = "";
+    document.getElementById("ipFilter").value = "";
+    document.getElementById("fromFilter").value = "";
+    document.getElementById("toFilter").value = "";
 
-            loadLogs();
-            loadStats();
-        }
-        function applyFilter() {
-            loadLogs();
-            loadStats();
-        }
+    applyFilter();
+}
 
-        loadLiveStatus();
-        loadLogs();
-        loadStats();
+function applyFilter() {
+    loadLogs();
+    loadStats();
+}
 
-        setInterval(() => {
-            loadLiveStatus();
-            loadLogs();
-            loadStats();
-        }, 5000);
+// Initial Load
+loadFilters();
+loadLiveStatus();
+applyFilter();
 
+// Auto Refresh
+setInterval(() => {
+    loadLiveStatus();
+    applyFilter();
+}, 5000);
     </script>
 </body>
 

@@ -92,6 +92,25 @@ if (boxCode && boxCode.trim() !== "") {
     res.status(500).json({ error: "Failed to fetch logs" });
   }
 });
+app.get("/filters", async (req, res) => {
+  try {
+    const boxCodes = await Log.distinct("boxCode", {
+      boxCode: { $ne: null }
+    });
+
+    const ips = await Log.distinct("ip", {
+      ip: { $ne: null }
+    });
+
+    res.json({
+      boxCodes,
+      ips
+    });
+  } catch (err) {
+    console.error("Filter load error:", err);
+    res.status(500).json({ error: "Failed to load filters" });
+  }
+});
 
 
 
