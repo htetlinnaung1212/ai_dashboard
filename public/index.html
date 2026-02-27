@@ -105,6 +105,61 @@
             font-weight: bold;
             color: #2563eb;
         }
+        .filter-container {
+    max-width: 1100px;
+    margin: 20px auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #475569;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
     </style>
 </head>
 
@@ -190,26 +245,40 @@
 
     </div>
     <div class="divider"></div>
-    <div style="max-width:1100px;margin:20px auto;text-align:center;">
+   <div class="filter-container">
 
+    <div class="filter-group">
+        <label>Type</label>
         <select id="typeFilter">
             <option value="ALL">All</option>
             <option value="AI_BOX">AI Box</option>
             <option value="NODE_RED">Node-RED</option>
         </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Box Code</label>
         <select id="boxCodeFilter">
             <option value="">All Box Codes</option>
         </select>
-
-
-
-        <input type="datetime-local" id="fromFilter">
-        <input type="datetime-local" id="toFilter">
-
-        <button onclick="applyFilter()">Apply Filter</button>
-        <button onclick="resetFilter()">Reset</button>
-
     </div>
+
+    <div class="filter-group">
+        <label>From</label>
+        <input type="datetime-local" id="fromFilter">
+    </div>
+
+    <div class="filter-group">
+        <label>To</label>
+        <input type="datetime-local" id="toFilter">
+    </div>
+
+    <div class="filter-buttons">
+        <button onclick="applyFilter()" class="btn-primary">Apply</button>
+        <button onclick="resetFilter()" class="btn-secondary">Reset</button>
+    </div>
+
+</div>
     <div class="divider"></div>
 
     <!-- ================= HISTORY ================= -->
