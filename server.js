@@ -26,10 +26,7 @@ const logSchema = new mongoose.Schema({
   type: String
 });
 
-const Log = mongoose.model("Log", logSchema);
-app.get("/dbcheck", async (req, res) => {
-  res.send("Connected to DB: " + mongoose.connection.name);
-});
+
 
 /* ================= UTILITIES ================= */
 
@@ -55,7 +52,10 @@ app.get("/logs", async (req, res) => {
   try {
     const { type, from, to, boxCode } = req.query;
 
-    let query = { type: "status_change" };
+   let query = {
+  type: "status_change",
+  online_status: { $exists: true }
+};
 
     if (type && type !== "ALL") {
       query.source = type;
