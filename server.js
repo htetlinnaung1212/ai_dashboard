@@ -27,6 +27,9 @@ const logSchema = new mongoose.Schema({
 });
 
 const Log = mongoose.model("Log", logSchema);
+app.get("/dbcheck", async (req, res) => {
+  res.send("Connected to DB: " + mongoose.connection.name);
+});
 
 /* ================= UTILITIES ================= */
 
