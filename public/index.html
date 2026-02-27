@@ -273,31 +273,72 @@
         }
         async function loadLogs() {
 
-            const type = document.getElementById("typeFilter").value;
-        
-            const boxCode = document.getElementById("boxCodeFilter").value; // 🔥 ADD THIS
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
+    const type = document.getElementById("typeFilter").value;
+    const boxCode = document.getElementById("boxCodeFilter").value;
+    const from = document.getElementById("fromFilter").value;
+    const to = document.getElementById("toFilter").value;
 
-            const res = await fetch(
-               `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
-            );
+    const res = await fetch(
+        `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
+    );
 
-            const logs = await res.json();
+    let logs = await res.json();
 
-            document.getElementById("logTable").innerHTML =
-                logs.map(log => `
-        <tr>
-            <td>${log.boxCode}</td>
-            <td>${log.source}</td>
-            <td class="${log.online_status}">
-                ${log.online_status}
-            </td>
-            <td>${log.timestamp}</td>
-            <td>-</td>
-        </tr>
-    `).join("");
+    // Convert timestamp safely
+    const normalize = (ts) => {
+        if (!ts) return null;
+        const [date, time] = ts.split(" ");
+        const [day, month, year] = date.split("/");
+        return new Date(`${year}-${month}-${day}T${time}`);
+    };
+
+    // Sort ascending for duration calculation
+    logs = logs.sort((a, b) =>
+        normalize(a.timestamp) - normalize(b.timestamp)
+    );
+
+    let rowsHTML = "";
+
+    for (let i = 0; i < logs.length; i++) {
+
+        const current = logs[i];
+        const currentTime = normalize(current.timestamp)?.getTime();
+
+        let duration = "-";
+
+        if (currentTime) {
+
+            let endTime;
+
+            if (i < logs.length - 1) {
+                const next = logs[i + 1];
+                endTime = normalize(next.timestamp)?.getTime();
+            } else {
+                endTime = Date.now();
+            }
+
+            if (endTime) {
+                const diff = Math.max(0, endTime - currentTime);
+                duration = formatDuration(diff);
+            }
         }
+
+        rowsHTML += `
+        <tr>
+            <td>${current.boxCode}</td>
+            <td>${current.source}</td>
+            <td class="${current.online_status}">
+                ${current.online_status}
+            </td>
+            <td>${current.timestamp}</td>
+            <td>${duration}</td>
+        </tr>`;
+    }
+
+    // Reverse back to show latest on top
+    document.getElementById("logTable").innerHTML =
+        rowsHTML.split("</tr>").reverse().join("</tr>");
+}
         async function loadLiveStatus() {
             const res = await fetch("/boxes");
             const data = await res.json();
