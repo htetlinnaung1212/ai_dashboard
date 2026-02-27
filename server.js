@@ -26,7 +26,7 @@ const logSchema = new mongoose.Schema({
   type: String
 });
 
-
+const Log = mongoose.model("Log", logSchema);
 
 /* ================= UTILITIES ================= */
 
