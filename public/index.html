@@ -271,7 +271,7 @@
                 console.error("Failed to load filters:", err);
             }
         }
-        async function loadLogs() {
+        async function loadLogs(showAll = false) {
 
             const type = document.getElementById("typeFilter").value;
             const boxCode = document.getElementById("boxCodeFilter").value;
@@ -284,20 +284,23 @@
 
             let logs = await res.json();
 
-            // Convert timestamp safely
+            // Sort newest first
+            logs = logs.sort((a, b) =>
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+
+            // If NOT filtering → show only last 5
+            if (!showAll && !type && !boxCode && !from && !to) {
+                logs = logs.slice(0, 5);
+            }
+
             const normalize = (ts) => {
-                if (!ts) return null;
                 const [date, time] = ts.split(" ");
                 const [day, month, year] = date.split("/");
                 return new Date(`${year}-${month}-${day}T${time}`);
             };
 
-            // Sort ascending for duration calculation
-            logs = logs.sort((a, b) =>
-                normalize(a.timestamp) - normalize(b.timestamp)
-            );
-
-            let rowsHTML = "";
+            let html = "";
 
             for (let i = 0; i < logs.length; i++) {
 
@@ -307,23 +310,22 @@
                 let duration = "-";
 
                 if (currentTime) {
-
                     let endTime;
 
                     if (i < logs.length - 1) {
-                        const next = logs[i + 1];
-                        endTime = normalize(next.timestamp)?.getTime();
+                        endTime = normalize(logs[i + 1].timestamp)?.getTime();
                     } else {
                         endTime = Date.now();
                     }
 
                     if (endTime) {
-                        const diff = Math.max(0, endTime - currentTime);
-                        duration = formatDuration(diff);
+                        duration = formatDuration(
+                            Math.max(0, endTime - currentTime)
+                        );
                     }
                 }
 
-                rowsHTML += `
+                html += `
         <tr>
             <td>${current.boxCode}</td>
             <td>${current.source}</td>
@@ -335,9 +337,7 @@
         </tr>`;
             }
 
-            // Reverse back to show latest on top
-            document.getElementById("logTable").innerHTML =
-                rowsHTML.split("</tr>").reverse().join("</tr>");
+            document.getElementById("logTable").innerHTML = html;
         }
         async function loadLiveStatus() {
             const res = await fetch("/boxes");
@@ -473,18 +473,18 @@
             document.getElementById("nodeOfflineDuration").innerText =
                 formatDuration(nodeStats.offlineDuration);
         }
+        function applyFilter() {
+            loadLogs(true);   // show full filtered results
+            loadStats();
+        }
+
         function resetFilter() {
             document.getElementById("typeFilter").value = "ALL";
             document.getElementById("boxCodeFilter").value = "";
-
             document.getElementById("fromFilter").value = "";
             document.getElementById("toFilter").value = "";
 
-            applyFilter();
-        }
-
-        function applyFilter() {
-            loadLogs();
+            loadLogs(false);  // show last 5 again
             loadStats();
         }
 
