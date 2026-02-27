@@ -271,6 +271,38 @@
         </tr>
     `).join("");
         }
+        async function loadLiveStatus() {
+            const res = await fetch("/boxes");
+            const data = await res.json();
+
+            document.getElementById("liveTable").innerHTML =
+                data.map((row, i) => `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${row.site}</td>
+
+            <td class="${row.aiBoxStatus}">
+                ${row.aiBoxStatus}
+            </td>
+            <td>${row.aiBoxLast}</td>
+
+            <td class="${row.mediaStatus}">
+                ${row.mediaStatus}
+            </td>
+            <td>${row.mediaLast}</td>
+
+            <td class="${row.aiServerStatus}">
+                ${row.aiServerStatus}
+            </td>
+            <td>${row.aiServerLast}</td>
+
+            <td class="${row.nodeStatus}">
+                ${row.nodeStatus}
+            </td>
+            <td>${row.nodeLast}</td>
+        </tr>
+    `).join("");
+        }
 
         async function loadStats() {
 
