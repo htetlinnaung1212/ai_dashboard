@@ -141,48 +141,48 @@
             gap: 10px;
         }
 
-       .btn-primary {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 9px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-}
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
 
-.btn-primary:hover {
-    background: #1e40af;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
-}
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+        }
 
-.btn-primary:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
-}
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
 
-.btn-secondary {
-    background: #e2e8f0;
-    color: #1e293b;
-    border: none;
-    padding: 9px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
 
-.btn-secondary:hover {
-    background: #cbd5e1;
-    transform: translateY(-2px);
-}
+        .btn-secondary:hover {
+            background: #cbd5e1;
+            transform: translateY(-2px);
+        }
 
-.btn-secondary:active {
-    transform: translateY(1px);
-}
+        .btn-secondary:active {
+            transform: translateY(1px);
+        }
     </style>
 </head>
 
@@ -230,18 +230,18 @@
     <div class="summary" id="aiSummary">
 
         <div class="summary-card">
-            <div>Total Aiboxes</div>
+            <div>Total AI Boxes</div>
             <div class="value" id="aiTotalHB">0</div>
         </div>
 
         <div class="summary-card">
-            <div>Total Online Duration</div>
-            <div class="value" id="aiOnlineDuration">0m</div>
+            <div>Online AI Boxes</div>
+            <div class="value" id="aiOnlineDuration">0</div>
         </div>
 
         <div class="summary-card">
-            <div>Total Offline Duration</div>
-            <div class="value" id="aiOfflineDuration">0m</div>
+            <div>Offline AI Boxes</div>
+            <div class="value" id="aiOfflineDuration">0</div>
         </div>
 
     </div>
@@ -252,18 +252,18 @@
     <div class="summary" id="nodeSummary">
 
         <div class="summary-card">
-            <div>Total Node-red</div>
+            <div>Total Node-RED</div>
             <div class="value" id="nodeTotalHB">0</div>
         </div>
 
         <div class="summary-card">
-            <div>Total Online Duration</div>
-            <div class="value" id="nodeOnlineDuration">0m</div>
+            <div>Online Node-RED</div>
+            <div class="value" id="nodeOnlineDuration">0</div>
         </div>
 
         <div class="summary-card">
-            <div>Total Offline Duration</div>
-            <div class="value" id="nodeOfflineDuration">0m</div>
+            <div>Offline Node-RED</div>
+            <div class="value" id="nodeOfflineDuration">0</div>
         </div>
 
     </div>
@@ -347,7 +347,7 @@
                 const data = await res.json();
 
                 const boxSelect = document.getElementById("boxCodeFilter");
-                const ipSelect = document.getElementById("ipFilter");
+              
 
                 // Reset options
                 boxSelect.innerHTML = '<option value="">All Box Codes</option>';
@@ -376,13 +376,18 @@
 
             let logs = await res.json();
 
-            // Sort newest first
+
             logs = logs.sort((a, b) =>
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
 
-            // If NOT filtering → show only last 5
-            if (!showAll && !type && !boxCode && !from && !to) {
+            if (
+                !showAll &&
+                type === "ALL" &&
+                !boxCode &&
+                !from &&
+                !to
+            ) {
                 logs = logs.slice(0, 5);
             }
 
@@ -421,61 +426,70 @@
         }
         async function loadLiveStatus() {
 
-    const res = await fetch("/boxes");
-    const data = await res.json();
+            try {
+                const res = await fetch("/boxes");
+                const data = await res.json();
 
-    const rows = data.boxes;   // 👈 important change
+                // Safe fallback
+                const rows = data.boxes || [];
+                const summary = data.summary || {
+                    ai: { total: 0, online: 0, offline: 0 },
+                    node: { total: 0, online: 0, offline: 0 }
+                };
 
-    // ================= LIVE TABLE =================
-    document.getElementById("liveTable").innerHTML =
-        rows.map((row, i) => `
-        <tr>
-            <td>${i + 1}</td>
-            <td>${row.site}</td>
+                // ================= LIVE TABLE =================
+                document.getElementById("liveTable").innerHTML =
+                    rows.map((row, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${row.site || "-"}</td>
 
-            <td class="${row.aiBoxStatus}">
-                ${row.aiBoxStatus}
-            </td>
-            <td>${row.aiBoxLast}</td>
+                    <td class="${row.aiBoxStatus || "offline"}">
+                        ${row.aiBoxStatus || "offline"}
+                    </td>
+                    <td>${row.aiBoxLast || "-"}</td>
 
-            <td class="${row.mediaStatus}">
-                ${row.mediaStatus}
-            </td>
-            <td>${row.mediaLast}</td>
+                    <td class="${row.mediaStatus || "stopped"}">
+                        ${row.mediaStatus || "stopped"}
+                    </td>
+                    <td>${row.mediaLast || "-"}</td>
 
-            <td class="${row.aiServerStatus}">
-                ${row.aiServerStatus}
-            </td>
-            <td>${row.aiServerLast}</td>
+                    <td class="${row.aiServerStatus || "stopped"}">
+                        ${row.aiServerStatus || "stopped"}
+                    </td>
+                    <td>${row.aiServerLast || "-"}</td>
 
-            <td class="${row.nodeStatus}">
-                ${row.nodeStatus}
-            </td>
-            <td>${row.nodeLast}</td>
-        </tr>
-    `).join("");
+                    <td class="${row.nodeStatus || "offline"}">
+                        ${row.nodeStatus || "offline"}
+                    </td>
+                    <td>${row.nodeLast || "-"}</td>
+                </tr>
+            `).join("");
 
-    // ================= SUMMARY CARDS =================
+                // ================= SUMMARY CARDS =================
 
-    document.getElementById("aiTotalHB").innerText =
-        data.summary.ai.total;
+                document.getElementById("aiTotalHB").innerText =
+                    summary.ai.total;
 
-    document.getElementById("aiOnlineDuration").innerText =
-        data.summary.ai.online;
+                document.getElementById("aiOnlineDuration").innerText =
+                    summary.ai.online;
 
-    document.getElementById("aiOfflineDuration").innerText =
-        data.summary.ai.offline;
+                document.getElementById("aiOfflineDuration").innerText =
+                    summary.ai.offline;
 
-    document.getElementById("nodeTotalHB").innerText =
-        data.summary.node.total;
+                document.getElementById("nodeTotalHB").innerText =
+                    summary.node.total;
 
-    document.getElementById("nodeOnlineDuration").innerText =
-        data.summary.node.online;
+                document.getElementById("nodeOnlineDuration").innerText =
+                    summary.node.online;
 
-    document.getElementById("nodeOfflineDuration").innerText =
-        data.summary.node.offline;
-}
+                document.getElementById("nodeOfflineDuration").innerText =
+                    summary.node.offline;
 
+            } catch (err) {
+                console.error("Live status load failed:", err);
+            }
+        }
         async function loadStats() {
 
             const type = document.getElementById("typeFilter").value;
@@ -483,103 +497,15 @@
             const from = document.getElementById("fromFilter").value;
             const to = document.getElementById("toFilter").value;
 
-            const res = await fetch(
+            // Still fetch logs so filter stays functional
+            await fetch(
                 `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
             );
 
-            const logs = (await res.json())
-                .filter(l => l.type === "status_change");
-
-            // Convert timestamp safely
-            const normalize = (ts) => {
-                if (!ts) return null;
-
-                const [date, time] = ts.split(" ");
-                const [day, month, year] = date.split("/");
-
-                // Force Bangkok timezone
-                return new Date(`${year}-${month}-${day}T${time}+07:00`);
-            };
-
-            const aiLogs = logs
-                .filter(l => l.source === "AI_BOX")
-                .sort((a, b) => normalize(a.timestamp) - normalize(b.timestamp));
-
-            const nodeLogs = logs
-                .filter(l => l.source === "NODE_RED")
-                .sort((a, b) => normalize(a.timestamp) - normalize(b.timestamp));
-
-            function calculateStats(filteredLogs) {
-
-                const uniqueBoxes = new Set(
-                    filteredLogs.map(l => l.boxCode)
-                );
-
-                let total = uniqueBoxes.size;
-                let onlineDuration = 0;
-                let offlineDuration = 0;
-
-                for (let i = 0; i < filteredLogs.length - 1; i++) {
-
-                    const current = filteredLogs[i];
-                    const next = filteredLogs[i + 1];
-
-                    const currentTime = normalize(current.timestamp)?.getTime();
-                    const nextTime = normalize(next.timestamp)?.getTime();
-
-                    if (!currentTime || !nextTime) continue;
-
-                    const diff = Math.max(0, nextTime - currentTime);
-
-                    if (current.online_status === "online")
-                        onlineDuration += diff;
-
-                    if (current.online_status === "offline")
-                        offlineDuration += diff;
-                }
-
-                // Add duration until NOW
-                if (filteredLogs.length > 0) {
-                    const last = filteredLogs[filteredLogs.length - 1];
-                    const lastTime = normalize(last.timestamp)?.getTime();
-                    const now = new Date().getTime();
-
-                    if (lastTime) {
-                        const diff = Math.max(0, now - lastTime);
-
-                        if (last.online_status === "online")
-                            onlineDuration += diff;
-
-                        if (last.online_status === "offline")
-                            offlineDuration += diff;
-                    }
-                }
-
-                return {
-                    total,
-                    onlineDuration,
-                    offlineDuration
-                };
-            }
-
-            const aiStats = calculateStats(aiLogs);
-            const nodeStats = calculateStats(nodeLogs);
-
-            document.getElementById("aiTotalHB").innerText = aiStats.total;
-            document.getElementById("aiOnlineDuration").innerText =
-                formatDuration(aiStats.onlineDuration);
-            document.getElementById("aiOfflineDuration").innerText =
-                formatDuration(aiStats.offlineDuration);
-
-            document.getElementById("nodeTotalHB").innerText = nodeStats.total;
-            document.getElementById("nodeOnlineDuration").innerText =
-                formatDuration(nodeStats.onlineDuration);
-            document.getElementById("nodeOfflineDuration").innerText =
-                formatDuration(nodeStats.offlineDuration);
         }
         function applyFilter() {
-            loadLogs(true);   // show full filtered results
-            loadStats();
+            loadLogs(true);   // show filtered results
+            loadStats();      // fetch logs (does not touch summary)
         }
 
         function resetFilter() {
