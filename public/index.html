@@ -347,7 +347,7 @@
                 const data = await res.json();
 
                 const boxSelect = document.getElementById("boxCodeFilter");
-              
+
 
                 // Reset options
                 boxSelect.innerHTML = '<option value="">All Box Codes</option>';
@@ -521,12 +521,12 @@
         // Initial Load
         loadFilters();
         loadLiveStatus();
-        applyFilter();
+        loadLogs(false);   // show last 5
 
         // Auto Refresh
         setInterval(() => {
             loadLiveStatus();
-        
+
         }, 5000);
     </script>
 </body>
