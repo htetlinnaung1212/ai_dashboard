@@ -280,6 +280,7 @@ app.get("/boxes", async (req, res) => {
         service_name: "aiserver.service"
       }).sort({ _id: -1 });
 
+      // ================= AI BOX =================
       let aiBoxStatus = "offline";
       let aiBoxLast = "-";
 
@@ -290,6 +291,7 @@ app.get("/boxes", async (req, res) => {
         }
       }
 
+      // ================= NODE RED =================
       let nodeStatus = "offline";
       let nodeLast = "-";
 
@@ -300,16 +302,42 @@ app.get("/boxes", async (req, res) => {
         }
       }
 
+      // ================= MEDIA SERVICE =================
+      let mediaStatus = "stopped";
+      let mediaLast = "-";
+
+      if (media?.timestamp) {
+        mediaLast = formatTime(media.timestamp);
+
+        const diff = now - new Date(media.timestamp).getTime();
+
+        if (diff < 3 * 60 * 1000 && media.service_status === "running") {
+          mediaStatus = "running";
+        }
+      }
+
+      // ================= AI SERVER SERVICE =================
+      let aiServerStatus = "stopped";
+      let aiServerLast = "-";
+
+      if (aiServer?.timestamp) {
+        aiServerLast = formatTime(aiServer.timestamp);
+
+        const diff = now - new Date(aiServer.timestamp).getTime();
+
+        if (diff < 3 * 60 * 1000 && aiServer.service_status === "running") {
+          aiServerStatus = "running";
+        }
+      }
+
       rows.push({
         site: boxCode,
         aiBoxStatus,
         aiBoxLast,
-        mediaStatus:
-          media?.service_status === "running" ? "running" : "stopped",
-        mediaLast: media?.timestamp ? formatTime(media.timestamp) : "-",
-        aiServerStatus:
-          aiServer?.service_status === "running" ? "running" : "stopped",
-        aiServerLast: aiServer?.timestamp ? formatTime(aiServer.timestamp) : "-",
+        mediaStatus,
+        mediaLast,
+        aiServerStatus,
+        aiServerLast,
         nodeStatus,
         nodeLast
       });
@@ -322,7 +350,6 @@ app.get("/boxes", async (req, res) => {
     res.status(500).json({ error: "Boxes fetch failed" });
   }
 });
-
 /* =================================================
    OFFLINE CHECKER
 ================================================= */
