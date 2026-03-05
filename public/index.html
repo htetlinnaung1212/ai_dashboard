@@ -407,8 +407,18 @@
                 let duration = "-";
 
                 if (currentTime) {
-                    const diff = Date.now() - currentTime;
-                    duration = formatDuration(Math.max(0, diff));
+                    let nextTime = null;
+
+                    if (logs[i - 1]) {
+                        nextTime = normalize(logs[i - 1].timestamp)?.getTime();
+                    }
+
+                    if (nextTime) {
+                        duration = formatDuration(nextTime - currentTime);
+                    } else {
+                        const diff = Date.now() - currentTime;
+                        duration = formatDuration(diff);
+                    }
                 }
 
                 html += `
