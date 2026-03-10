@@ -430,6 +430,42 @@ async function startOfflineChecker() {
         });
       }
     }
+    // ================= NODE RED OFFLINE CHECK =================
+
+const nodeBoxes = await Log.distinct("boxCode", { source: "NODE_RED" });
+
+for (const boxCode of nodeBoxes) {
+
+  const lastHeartbeat = await Log.findOne({
+    boxCode,
+    source: "NODE_RED",
+    type: "heartbeat"
+  }).sort({ _id: -1 });
+
+  const lastStatus = await Log.findOne({
+    boxCode,
+    source: "NODE_RED",
+    type: "status_change"
+  }).sort({ _id: -1 });
+
+  if (!lastHeartbeat?.timestamp || !lastStatus) continue;
+
+  if (
+    lastStatus.online_status === "online" &&
+    Date.now() - new Date(lastHeartbeat.timestamp).getTime() > HEARTBEAT_TIMEOUT
+  ) {
+
+    await saveLog({
+      boxCode,
+      ip: lastHeartbeat.ip,
+      source: "NODE_RED",
+      online_status: "offline",
+      type: "status_change"
+    });
+
+    console.log(`NODE-RED STATUS: ${boxCode} ONLINE → OFFLINE`);
+  }
+}
 
   }, 5000);
 }
