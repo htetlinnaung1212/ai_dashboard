@@ -413,10 +413,10 @@
                         nextTime = normalize(logs[i - 1].timestamp)?.getTime();
                     }
 
-                    if (nextTime) {
+                    if (nextTime && nextTime > currentTime) {
                         duration = formatDuration(nextTime - currentTime);
                     } else {
-                        const diff = Date.now() - currentTime;
+                        const diff = Math.max(0, Date.now() - currentTime);
                         duration = formatDuration(diff);
                     }
                 }
