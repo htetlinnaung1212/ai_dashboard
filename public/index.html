@@ -328,6 +328,13 @@
 
     <script>
         let filterApplied = false;
+
+let appliedFilters = {
+    type: "ALL",
+    boxCode: "",
+    from: "",
+    to: ""
+};
         function parseTS(ts) {
             const [d, t] = ts.split(" ");
             const [day, mon, yr] = d.split("/");
@@ -366,10 +373,7 @@
         }
         async function loadLogs(showAll = false) {
 
-            const type = document.getElementById("typeFilter").value;
-            const boxCode = document.getElementById("boxCodeFilter").value;
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
+           const { type, boxCode, from, to } = appliedFilters;
 
             const res = await fetch(
                 `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
@@ -522,36 +526,43 @@
         }
         function applyFilter() {
 
-            const type = document.getElementById("typeFilter").value;
-            const boxCode = document.getElementById("boxCodeFilter").value;
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
+    appliedFilters.type = document.getElementById("typeFilter").value;
+    appliedFilters.boxCode = document.getElementById("boxCodeFilter").value;
+    appliedFilters.from = document.getElementById("fromFilter").value;
+    appliedFilters.to = document.getElementById("toFilter").value;
 
-            const noFilterSelected =
-                type === "ALL" &&
-                !boxCode &&
-                !from &&
-                !to;
+    const noFilterSelected =
+        appliedFilters.type === "ALL" &&
+        !appliedFilters.boxCode &&
+        !appliedFilters.from &&
+        !appliedFilters.to;
 
-            if (noFilterSelected) {
-                filterApplied = false;
-                loadLogs(false);   // show last 5
-            } else {
-                filterApplied = true;
-                loadLogs(true);    // show filtered results
-            }
-        }
-        function resetFilter() {
+    if (noFilterSelected) {
+        filterApplied = false;
+        loadLogs(false);
+    } else {
+        filterApplied = true;
+        loadLogs(true);
+    }
+}
+       function resetFilter() {
 
-            filterApplied = false;
+    filterApplied = false;
 
-            document.getElementById("typeFilter").value = "ALL";
-            document.getElementById("boxCodeFilter").value = "";
-            document.getElementById("fromFilter").value = "";
-            document.getElementById("toFilter").value = "";
+    appliedFilters = {
+        type: "ALL",
+        boxCode: "",
+        from: "",
+        to: ""
+    };
 
-            loadLogs(false);   // show latest 5 again
-        }
+    document.getElementById("typeFilter").value = "ALL";
+    document.getElementById("boxCodeFilter").value = "";
+    document.getElementById("fromFilter").value = "";
+    document.getElementById("toFilter").value = "";
+
+    loadLogs(false);
+}
         // Initial Load
         loadFilters();
         loadLiveStatus();
