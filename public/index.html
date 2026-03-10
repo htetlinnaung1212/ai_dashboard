@@ -522,53 +522,53 @@
         }
         function applyFilter() {
 
-    const type = document.getElementById("typeFilter").value;
-    const boxCode = document.getElementById("boxCodeFilter").value;
-    const from = document.getElementById("fromFilter").value;
-    const to = document.getElementById("toFilter").value;
+            const type = document.getElementById("typeFilter").value;
+            const boxCode = document.getElementById("boxCodeFilter").value;
+            const from = document.getElementById("fromFilter").value;
+            const to = document.getElementById("toFilter").value;
 
-    const noFilterSelected =
-        type === "ALL" &&
-        !boxCode &&
-        !from &&
-        !to;
+            const noFilterSelected =
+                type === "ALL" &&
+                !boxCode &&
+                !from &&
+                !to;
 
-    if (noFilterSelected) {
-        filterApplied = false;
-        loadLogs(false);   // show last 5
-    } else {
-        filterApplied = true;
-        loadLogs(true);    // show filtered results
-    }
-}
+            if (noFilterSelected) {
+                filterApplied = false;
+                loadLogs(false);   // show last 5
+            } else {
+                filterApplied = true;
+                loadLogs(true);    // show filtered results
+            }
+        }
         function resetFilter() {
 
-    filterApplied = false;
+            filterApplied = false;
 
-    document.getElementById("typeFilter").value = "ALL";
-    document.getElementById("boxCodeFilter").value = "";
-    document.getElementById("fromFilter").value = "";
-    document.getElementById("toFilter").value = "";
+            document.getElementById("typeFilter").value = "ALL";
+            document.getElementById("boxCodeFilter").value = "";
+            document.getElementById("fromFilter").value = "";
+            document.getElementById("toFilter").value = "";
 
-    loadLogs(false);   // show latest 5 again
-}
+            loadLogs(false);   // show latest 5 again
+        }
         // Initial Load
         loadFilters();
         loadLiveStatus();
         loadLogs(false);   // show last 5
 
         // Auto Refresh
-       setInterval(() => {
+        setInterval(() => {
 
-    loadLiveStatus();
+            loadLiveStatus();
 
-    if (filterApplied) {
-        loadLogs(true);   // keep showing filtered data
-    } else {
-        loadLogs(false);  // show latest 5 logs
-    }
+            if (filterApplied) {
+                loadLogs(true);   // keep showing filtered data
+            } else {
+                loadLogs(false);  // show latest 5 logs
+            }
 
-}, 5000);
+        }, 5000);
     </script>
 </body>
 
