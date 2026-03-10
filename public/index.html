@@ -409,8 +409,14 @@
                 if (currentTime) {
                     let nextTime = null;
 
-                    if (logs[i - 1]) {
-                        nextTime = normalize(logs[i - 1].timestamp)?.getTime();
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (
+                            logs[j].boxCode === current.boxCode &&
+                            logs[j].source === current.source
+                        ) {
+                            nextTime = normalize(logs[j].timestamp)?.getTime();
+                            break;
+                        }
                     }
 
                     if (nextTime && nextTime > currentTime) {
