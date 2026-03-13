@@ -327,14 +327,18 @@
     </div>
 
     <script>
+        const boxNameMap = {
+            "HMXTKE6BEJHBJ0317": "Farm-01",
+            "HQDZKE6BCJEBB1231": "Farm-02"
+        };
         let filterApplied = false;
 
-let appliedFilters = {
-    type: "ALL",
-    boxCode: "",
-    from: "",
-    to: ""
-};
+        let appliedFilters = {
+            type: "ALL",
+            boxCode: "",
+            from: "",
+            to: ""
+        };
         function parseTS(ts) {
             const [d, t] = ts.split(" ");
             const [day, mon, yr] = d.split("/");
@@ -373,7 +377,7 @@ let appliedFilters = {
         }
         async function loadLogs(showAll = false) {
 
-           const { type, boxCode, from, to } = appliedFilters;
+            const { type, boxCode, from, to } = appliedFilters;
 
             const res = await fetch(
                 `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
@@ -463,7 +467,7 @@ let appliedFilters = {
                     rows.map((row, i) => `
                 <tr>
                     <td>${i + 1}</td>
-                    <td>${row.site || "-"}</td>
+                    <td>${boxNameMap[row.boxCode] || row.boxCode}</td>
 
                     <td class="${row.aiBoxStatus || "offline"}">
                         ${row.aiBoxStatus || "offline"}
@@ -526,43 +530,43 @@ let appliedFilters = {
         }
         function applyFilter() {
 
-    appliedFilters.type = document.getElementById("typeFilter").value;
-    appliedFilters.boxCode = document.getElementById("boxCodeFilter").value;
-    appliedFilters.from = document.getElementById("fromFilter").value;
-    appliedFilters.to = document.getElementById("toFilter").value;
+            appliedFilters.type = document.getElementById("typeFilter").value;
+            appliedFilters.boxCode = document.getElementById("boxCodeFilter").value;
+            appliedFilters.from = document.getElementById("fromFilter").value;
+            appliedFilters.to = document.getElementById("toFilter").value;
 
-    const noFilterSelected =
-        appliedFilters.type === "ALL" &&
-        !appliedFilters.boxCode &&
-        !appliedFilters.from &&
-        !appliedFilters.to;
+            const noFilterSelected =
+                appliedFilters.type === "ALL" &&
+                !appliedFilters.boxCode &&
+                !appliedFilters.from &&
+                !appliedFilters.to;
 
-    if (noFilterSelected) {
-        filterApplied = false;
-        loadLogs(false);
-    } else {
-        filterApplied = true;
-        loadLogs(true);
-    }
-}
-       function resetFilter() {
+            if (noFilterSelected) {
+                filterApplied = false;
+                loadLogs(false);
+            } else {
+                filterApplied = true;
+                loadLogs(true);
+            }
+        }
+        function resetFilter() {
 
-    filterApplied = false;
+            filterApplied = false;
 
-    appliedFilters = {
-        type: "ALL",
-        boxCode: "",
-        from: "",
-        to: ""
-    };
+            appliedFilters = {
+                type: "ALL",
+                boxCode: "",
+                from: "",
+                to: ""
+            };
 
-    document.getElementById("typeFilter").value = "ALL";
-    document.getElementById("boxCodeFilter").value = "";
-    document.getElementById("fromFilter").value = "";
-    document.getElementById("toFilter").value = "";
+            document.getElementById("typeFilter").value = "ALL";
+            document.getElementById("boxCodeFilter").value = "";
+            document.getElementById("fromFilter").value = "";
+            document.getElementById("toFilter").value = "";
 
-    loadLogs(false);
-}
+            loadLogs(false);
+        }
         // Initial Load
         loadFilters();
         loadLiveStatus();
