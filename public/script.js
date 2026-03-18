@@ -27,6 +27,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (m) return `${m}m ${s % 60}s`;
         return `${s}s`;
     }
+    function setDefaultFromDate() {
+        const now = new Date();
+
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+
+
+        document.getElementById("fromFilter").value = `${yyyy}-${mm}-${dd}T00:00`;
+    }
     async function loadFilters() {
         try {
             const res = await fetch("/filters");
@@ -86,6 +96,14 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < logs.length; i++) {
 
             const current = logs[i];
+            const selectedStatus = appliedFilters.status;
+
+            if (
+                selectedStatus !== "all" &&
+                current.online_status !== selectedStatus
+            ) {
+                continue;
+            }
             const currentTime = normalize(current.timestamp)?.getTime();
 
             let duration = "-";
@@ -134,19 +152,26 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${duration}</td>
     </tr>`;
         }
-        const selectedStatus = appliedFilters.status;
-        if (selectedStatus === "online") {
-            document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
-            document.getElementById("totalOffline").innerText = "-";
-        } else if (selectedStatus === "offline") {
+        if (!filterApplied) {
             document.getElementById("totalOnline").innerText = "-";
-            document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
+            document.getElementById("totalOffline").innerText = "-";
         } else {
-            document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
-            document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
+            const selectedStatus = appliedFilters.status;
+
+            if (selectedStatus === "online") {
+                document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
+                document.getElementById("totalOffline").innerText = "-";
+            } else if (selectedStatus === "offline") {
+                document.getElementById("totalOnline").innerText = "-";
+                document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
+            } else {
+                document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
+                document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
+            }
         }
         document.getElementById("logTable").innerHTML = html;
     }
+
     async function loadLiveStatus() {
 
         try {
@@ -274,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // Initial Load
     loadFilters();
+    setDefaultFromDate();
     loadLiveStatus();
     loadLogs(false);   // show last 5
 

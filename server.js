@@ -52,10 +52,10 @@ app.get("/logs", async (req, res) => {
   try {
     const { type, from, to, boxCode } = req.query;
 
-   let query = {
-  type: "status_change",
-  online_status: { $exists: true }
-};
+    let query = {
+      type: "status_change",
+      online_status: { $exists: true }
+    };
 
     if (type && type !== "ALL") {
       query.source = type;
@@ -65,28 +65,35 @@ app.get("/logs", async (req, res) => {
       query.boxCode = boxCode.trim();
     }
 
+    // ✅ FIX: add timestamp filter BEFORE fetching
+    if (from || to) {
+      query.timestamp = {};
+
+      if (from) {
+        const fromDate = new Date(from);
+
+        // 🔥 go back 1 day (important for duration logic)
+        fromDate.setDate(fromDate.getDate() - 1);
+
+        query.timestamp.$gte = fromDate;
+      }
+
+      if (to) {
+        const toDate = new Date(to);
+
+        // optional but recommended
+        toDate.setSeconds(59);
+        toDate.setMilliseconds(999);
+
+        query.timestamp.$lte = toDate;
+      }
+    }
+
     const logs = await Log.find(query)
       .sort({ _id: -1 })
       .limit(1000);
 
     let filteredLogs = logs;
-
-    if (from || to) {
-      filteredLogs = logs.filter(log => {
-        const logTime = log.timestamp
-          ? new Date(log.timestamp).getTime()
-          : null;
-
-        const fromTime = from ? new Date(from).getTime() : null;
-        const toTime = to ? new Date(to).getTime() : null;
-
-        if (!logTime) return false;
-        if (fromTime && logTime < fromTime) return false;
-        if (toTime && logTime > toTime) return false;
-
-        return true;
-      });
-    }
 
     res.json(
       filteredLogs.map(log => ({
@@ -100,7 +107,6 @@ app.get("/logs", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch logs" });
   }
 });
-
 /* =================================================
    FILTERS
 ================================================= */
