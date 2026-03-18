@@ -71,7 +71,7 @@ app.get("/logs", async (req, res) => {
 
       if (from) {
         const fromDate = new Date(from);
-        query.timestamp.$gte = fromDate;   // ❌ NO -1 day
+        query.timestamp.$gte = fromDate;  
       }
 
       if (to) {
