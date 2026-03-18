@@ -28,19 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${s}s`;
     }
     function setDefaultFromDate() {
-    const input = document.getElementById("fromFilter");
+        const input = document.getElementById("fromFilter");
 
-    // 👉 ONLY set if empty (important)
-    if (!input.value) {
-        const now = new Date();
+        // 👉 ONLY set if empty (important)
+        if (!input.value) {
+            const now = new Date();
 
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, "0");
-        const dd = String(now.getDate()).padStart(2, "0");
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
 
-        input.value = `${yyyy}-${mm}-${dd}T00:00`;
+            input.value = `${yyyy}-${mm}-${dd}T00:00`;
+        }
     }
-}
     async function loadFilters() {
         try {
             const res = await fetch("/filters");
@@ -82,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
             type === "ALL" &&
             !boxCode &&
             !from &&
-            !to
+            !to &&
+            status === "all"
         ) {
             logs = logs.slice(0, 5);
         }
@@ -301,11 +302,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loadLogs(false);
     }
-    // Initial Load
-    loadFilters();
+   loadFilters();
+loadLiveStatus();
+
+// 🔥 Delay to override browser restore
+setTimeout(() => {
+    const fromInput = document.getElementById("fromFilter");
+    fromInput.value = "";
     setDefaultFromDate();
-    loadLiveStatus();
-    loadLogs(false);   // show last 5
+}, 0);
+
+loadLogs(false);
 
     // Auto Refresh
     setInterval(() => {
