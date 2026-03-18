@@ -6,7 +6,7 @@ body {
     color: #333;
 }
 
-h1, h2 {
+h1 {
     text-align: center;
 }
 
@@ -95,7 +95,10 @@ tbody tr:hover {
     margin: 0 0 15px 0;}
 
 .summary-title {
-    margin-top: 0;
+   font-size: 20px;
+    font-weight: 600;
+    text-align: left;
+    margin: 0 0 15px 0;
 }
 .table-section {
     display: flex;
