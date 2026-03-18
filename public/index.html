@@ -5,98 +5,98 @@
     <meta charset="UTF-8">
     <title>AI Box Dashboard</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-<h1>AI Box Dashboard</h1>
-   <div class="dashboard-container">
+    <h1>AI Box Dashboard</h1>
+    <div class="dashboard-container">
 
-    <!--: LIVE TABLE -->
-    <div class="table-section">
-        <h2 class="summary-title">AI Box Live Status</h2>
+        <!--: LIVE TABLE -->
+        <div class="table-section">
+            <h2 class="summary-title">AI Box Live Status</h2>
 
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2">No.</th>
-                        <th rowspan="2">Box Code</th>
-                        <th colspan="6">AI Box</th>
-                        <th colspan="2">Node-RED</th>
-                    </tr>
-                    <tr>
-                        <th>Device Status</th>
-                        <th>Last Heartbeat</th>
-                        <th>Media</th>
-                        <th>Last Update</th>
-                        <th>AI Server</th>
-                        <th>Last Update</th>
-                        <th>Service</th>
-                        <th>Last Update</th>
-                    </tr>
-                </thead>
-                <tbody id="liveTable">
-                    <tr>
-                        <td colspan="10">Loading...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- RIGHT: SUMMARY -->
-    <div class="summary-section">
-
-        <!-- AI BOX SUMMARY -->
-        <div>
-            <h2 class="summary-title">AI Box Summary</h2>
-            <div class="summary" id="aiSummary">
-
-                <div class="summary-card">
-                    <div>Total</div>
-                    <div class="value" id="aiTotalHB">0</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="online">Online</div>
-                    <div class="value" id="aiOnlineDuration">0</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="offline">Offline</div>
-                    <div class="value" id="aiOfflineDuration">0</div>
-                </div>
-
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">No.</th>
+                            <th rowspan="2">Box Code</th>
+                            <th colspan="6">AI Box</th>
+                            <th colspan="2">Node-RED</th>
+                        </tr>
+                        <tr>
+                            <th>Device Status</th>
+                            <th>Last Heartbeat</th>
+                            <th>Media</th>
+                            <th>Last Update</th>
+                            <th>AI Server</th>
+                            <th>Last Update</th>
+                            <th>Service</th>
+                            <th>Last Update</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liveTable">
+                        <tr>
+                            <td colspan="10">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- NODE-RED SUMMARY -->
-        <div>
-            <h2 class="summary-title">Node-RED Summary</h2>
-            <div class="summary" id="nodeSummary">
+        <!-- RIGHT: SUMMARY -->
+        <div class="summary-section">
 
-                <div class="summary-card">
-                    <div>Total</div>
-                    <div class="value" id="nodeTotalHB">0</div>
+            <!-- AI BOX SUMMARY -->
+            <div>
+                <h2 class="summary-title">AI Box Summary</h2>
+                <div class="summary" id="aiSummary">
+
+                    <div class="summary-card">
+                        <div>Total</div>
+                        <div class="value" id="aiTotalHB">0</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="online">Online</div>
+                        <div class="value" id="aiOnlineDuration">0</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="offline">Offline</div>
+                        <div class="value" id="aiOfflineDuration">0</div>
+                    </div>
+
                 </div>
-
-                <div class="summary-card">
-                    <div class="online">Online</div>
-                    <div class="value" id="nodeOnlineDuration">0</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="offline">Offline</div>
-                    <div class="value" id="nodeOfflineDuration">0</div>
-                </div>
-
             </div>
+
+            <!-- NODE-RED SUMMARY -->
+            <div>
+                <h2 class="summary-title">Node-RED Summary</h2>
+                <div class="summary" id="nodeSummary">
+
+                    <div class="summary-card">
+                        <div>Total</div>
+                        <div class="value" id="nodeTotalHB">0</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="online">Online</div>
+                        <div class="value" id="nodeOnlineDuration">0</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="offline">Offline</div>
+                        <div class="value" id="nodeOfflineDuration">0</div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
     </div>
-
-</div>
     <div class="divider"></div>
     <div class="filter-container">
 
@@ -125,14 +125,33 @@
             <label>To</label>
             <input type="datetime-local" id="toFilter">
         </div>
+           <div class="filter-group">
+            <label>Status</label>
+            <select id="statusFilter">
+                <option value="all">All</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+            </select>
+        </div>
 
         <div class="filter-buttons">
             <button onclick="applyFilter()" class="btn-primary">Apply</button>
             <button onclick="resetFilter()" class="btn-secondary">Reset</button>
         </div>
+     
 
     </div>
-  
+<div class="history-summary">
+  <div class="card online-card">
+    <h3>Total Online Duration</h3>
+    <p id="totalOnline">0</p>
+  </div>
+
+  <div class="card offline-card">
+    <h3>Total Offline Duration</h3>
+    <p id="totalOffline">0</p>
+  </div>
+</div>
 
     <!-- ================= HISTORY ================= -->
     <h2>AI Box Status History</h2>
@@ -147,7 +166,7 @@
                     <th>Date & Time</th>
                     <th>Duration</th>
                 </tr>
-            </thead>  
+            </thead>
             <tbody id="logTable">
                 <tr>
                     <td colspan="5">Loading...</td>
@@ -156,7 +175,7 @@
         </table>
     </div>
 
-   <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

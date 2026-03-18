@@ -6,7 +6,7 @@ body {
     color: #333;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
 }
 
@@ -231,6 +231,27 @@ tbody tr:hover {
 
 .btn-secondary:active {
     transform: translateY(1px);
+}
+.history-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.online-card {
+  background: #28a745;
+}
+
+.offline-card {
+  background: #dc3545;
 }
 
 /* ================= MONITORING UI ================= */

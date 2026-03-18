@@ -22,8 +22,8 @@ A web-based dashboard for monitoring and managing AI-related services and status
 while true
 do
 
-BOX_CODE="HQDZKE6BCJEBB1231" 
-NODE_RED_URL="http://192.168.102.251:1880/service-status"
+BOX_CODE="HQDZKE6BCJEBB1231" (Change based on server)
+NODE_RED_URL="http://192.168.102.251:1880/service-status" (Change based on server)
 
 services=(
   "mediaserver.service"
