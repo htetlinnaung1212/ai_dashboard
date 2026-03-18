@@ -1,0 +1,263 @@
+/* ================= GLOBAL ================= */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2f7, #f9fbfd);
+    padding: 30px;
+    color: #333;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+/* ================= STATUS ================= */
+.online {
+    color: #1e7f3c;
+    font-weight: bold;
+}
+
+.offline {
+    color: #b42318;
+    font-weight: bold;
+}
+
+.running {
+    color: #1e7f3c;
+    font-weight: bold;
+}
+
+.stopped {
+    color: #d97706;
+    font-weight: bold;
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #cbd5e1;
+}
+
+th:last-child, td:last-child {
+    border-right: none;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+thead tr:first-child th {
+    background: #2563eb;
+    color: white;
+}
+
+thead tr:nth-child(2) th {
+    background: #3b82f6;
+    color: white;
+}
+
+tbody tr {
+    transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* TABLE SCROLL */
+.table-responsive {
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* ================= DASHBOARD LAYOUT ================= */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 20px;
+}
+
+.table-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ================= SUMMARY ================= */
+.summary {
+    max-width: 100%;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.summary-card .value {
+    font-size: 30px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.summary-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* ================= FILTER ================= */
+.filter-container {
+    max-width: 1100px;
+    margin: 20px auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #475569;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+/* ================= BUTTONS ================= */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #1e293b;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: translateY(1px);
+}
+
+/* ================= MONITORING UI ================= */
+tr.offline-row {
+    background: #fef2f2 !important;
+}
+
+.status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.green {
+    background: #22c55e;
+    animation: blink 1.2s infinite;
+}
+
+.red {
+    background: #ef4444;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-section {
+        flex-direction: row;
+    }
+
+    .summary {
+        grid-template-columns: 1fr;
+    }
+}

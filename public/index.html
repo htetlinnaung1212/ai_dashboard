@@ -5,268 +5,98 @@
     <meta charset="UTF-8">
     <title>AI Box Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #eef2f7, #f9fbfd);
-            padding: 30px;
-            color: #333;
-        }
-
-        h1,
-        h2 {
-            text-align: center;
-        }
-
-        .online {
-            color: #1e7f3c;
-            font-weight: bold;
-        }
-
-        .offline {
-            color: #b42318;
-            font-weight: bold;
-        }
-
-        .running {
-            color: #1e7f3c;
-            font-weight: bold;
-        }
-
-        .stopped {
-            color: #d97706;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid #e5e7eb;
-            border-right: 1px solid #cbd5e1;
-        }
-
-        th:last-child,
-        td:last-child {
-            border-right: none;
-        }
-
-        thead tr:first-child th {
-            background: #2563eb;
-            color: white;
-        }
-
-        thead tr:nth-child(2) th {
-            background: #3b82f6;
-            color: white;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .divider {
-            height: 1px;
-            background: #e5e7eb;
-            margin: 50px auto;
-        }
-
-        .summary {
-            max-width: 1100px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .summary-card {
-            background: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .summary-card .value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2563eb;
-        }
-
-        .filter-container {
-            max-width: 1100px;
-            margin: 20px auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            min-width: 160px;
-        }
-
-        .filter-group label {
-            font-size: 13px;
-            margin-bottom: 5px;
-            color: #475569;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-size: 14px;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 9px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: #1e40af;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #1e293b;
-            border: none;
-            padding: 9px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e1;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary:active {
-            transform: translateY(1px);
-        }
-    </style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+<h1>AI Box Dashboard</h1>
+   <div class="dashboard-container">
 
-    <h1>AI Box Dashboard</h1>
-
-    <!-- ================= LIVE STATUS ================= -->
-    <div class="table-responsive">
+    <!--: LIVE TABLE -->
+    <div class="table-section">
         <h2>AI Box Live Status</h2>
 
-        <table>
-            <thead>
-                <tr>
-                    <th rowspan="2">No.</th>
-                    <th rowspan="2">Box Code</th>
-                    <th colspan="6">AI Box</th>
-                    <th colspan="2">Node-RED</th>
-                </tr>
-                <tr>
-                    <th>Device Status</th>
-                    <th>Last Heartbeat</th>
-                    <th>Media</th>
-                    <th>Last Update</th>
-                    <th>AI Server</th>
-                    <th>Last Update</th>
-                    <th>Service</th>
-                    <th>Last Update</th>
-                </tr>
-            </thead>
-            <tbody id="liveTable">
-                <tr>
-                    <td colspan="10">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">No.</th>
+                        <th rowspan="2">Box Code</th>
+                        <th colspan="6">AI Box</th>
+                        <th colspan="2">Node-RED</th>
+                    </tr>
+                    <tr>
+                        <th>Device Status</th>
+                        <th>Last Heartbeat</th>
+                        <th>Media</th>
+                        <th>Last Update</th>
+                        <th>AI Server</th>
+                        <th>Last Update</th>
+                        <th>Service</th>
+                        <th>Last Update</th>
+                    </tr>
+                </thead>
+                <tbody id="liveTable">
+                    <tr>
+                        <td colspan="10">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="divider"></div>
+    <!-- RIGHT: SUMMARY -->
+    <div class="summary-section">
 
-    <!-- ================= SUMMARY ================= -->
-    <div class="divider"></div>
+        <!-- AI BOX SUMMARY -->
+        <div>
+            <h3 class="summary-title">AI Box Summary</h3>
+            <div class="summary" id="aiSummary">
 
-    <h2 style="text-align:center;">AI Box Summary</h2>
-    <div class="summary" id="aiSummary">
+                <div class="summary-card">
+                    <div>Total</div>
+                    <div class="value" id="aiTotalHB">0</div>
+                </div>
 
-        <div class="summary-card">
-            <div>Total AI Boxes</div>
-            <div class="value" id="aiTotalHB">0</div>
+                <div class="summary-card">
+                    <div class="online">Online</div>
+                    <div class="value" id="aiOnlineDuration">0</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="offline">Offline</div>
+                    <div class="value" id="aiOfflineDuration">0</div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="summary-card">
-            <div>Online AI Boxes</div>
-            <div class="value" id="aiOnlineDuration">0</div>
-        </div>
+        <!-- NODE-RED SUMMARY -->
+        <div>
+            <h3 class="summary-title">Node-RED Summary</h3>
+            <div class="summary" id="nodeSummary">
 
-        <div class="summary-card">
-            <div>Offline AI Boxes</div>
-            <div class="value" id="aiOfflineDuration">0</div>
+                <div class="summary-card">
+                    <div>Total</div>
+                    <div class="value" id="nodeTotalHB">0</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="online">Online</div>
+                    <div class="value" id="nodeOnlineDuration">0</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="offline">Offline</div>
+                    <div class="value" id="nodeOfflineDuration">0</div>
+                </div>
+
+            </div>
         </div>
 
     </div>
 
-    <div class="divider"></div>
-
-    <h2 style="text-align:center;">Node-RED Summary</h2>
-    <div class="summary" id="nodeSummary">
-
-        <div class="summary-card">
-            <div>Total Node-RED</div>
-            <div class="value" id="nodeTotalHB">0</div>
-        </div>
-
-        <div class="summary-card">
-            <div>Online Node-RED</div>
-            <div class="value" id="nodeOnlineDuration">0</div>
-        </div>
-
-        <div class="summary-card">
-            <div>Offline Node-RED</div>
-            <div class="value" id="nodeOfflineDuration">0</div>
-        </div>
-
-    </div>
+</div>
     <div class="divider"></div>
     <div class="filter-container">
 
@@ -317,7 +147,7 @@
                     <th>Date & Time</th>
                     <th>Duration</th>
                 </tr>
-            </thead>
+            </thead>  
             <tbody id="logTable">
                 <tr>
                     <td colspan="5">Loading...</td>
@@ -326,265 +156,7 @@
         </table>
     </div>
 
-    <script>
-        const boxNameMap = {
-            "HMXTKE6BEJHBJ0317": "OTOD2",
-            "HQDZKE6BCJEBB1231": "SmartIV"
-        };
-        let filterApplied = false;
-
-        let appliedFilters = {
-            type: "ALL",
-            boxCode: "",
-            from: "",
-            to: ""
-        };
-        function parseTS(ts) {
-            const [d, t] = ts.split(" ");
-            const [day, mon, yr] = d.split("/");
-            return new Date(`${yr}-${mon}-${day}T${t}`);
-        }
-
-        function formatDuration(ms) {
-            const s = Math.floor(ms / 1000);
-            const m = Math.floor(s / 60);
-            const h = Math.floor(m / 60);
-            if (h) return `${h}h ${m % 60}m`;
-            if (m) return `${m}m ${s % 60}s`;
-            return `${s}s`;
-        }
-        async function loadFilters() {
-            try {
-                const res = await fetch("/filters");
-                const data = await res.json();
-
-                const boxSelect = document.getElementById("boxCodeFilter");
-
-
-                // Reset options
-                boxSelect.innerHTML = '<option value="">All Box Codes</option>';
-
-
-                data.boxCodes.forEach(code => {
-                    if (code)
-                        boxSelect.innerHTML += `<option value="${code}">${code}</option>`;
-                });
-
-
-            } catch (err) {
-                console.error("Failed to load filters:", err);
-            }
-        }
-        async function loadLogs(showAll = false) {
-
-            const { type, boxCode, from, to } = appliedFilters;
-
-            const res = await fetch(
-                `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
-            );
-
-            let logs = await res.json();
-
-
-            logs = logs.sort((a, b) =>
-                new Date(b.timestamp) - new Date(a.timestamp)
-            );
-
-            if (
-                !showAll &&
-                type === "ALL" &&
-                !boxCode &&
-                !from &&
-                !to
-            ) {
-                logs = logs.slice(0, 5);
-            }
-
-            const normalize = (ts) => {
-                const [date, time] = ts.split(" ");
-                const [day, month, year] = date.split("/");
-                return new Date(`${year}-${month}-${day}T${time}`);
-            };
-
-            let html = "";
-
-            for (let i = 0; i < logs.length; i++) {
-
-                const current = logs[i];
-                const currentTime = normalize(current.timestamp)?.getTime();
-
-                let duration = "-";
-
-                if (currentTime) {
-                    let nextTime = null;
-
-                    for (let j = i - 1; j >= 0; j--) {
-                        if (
-                            logs[j].boxCode === current.boxCode &&
-                            logs[j].source === current.source
-                        ) {
-                            nextTime = normalize(logs[j].timestamp)?.getTime();
-                            break;
-                        }
-                    }
-
-                    if (nextTime && nextTime > currentTime) {
-                        duration = formatDuration(nextTime - currentTime);
-                    } else {
-                        const diff = Math.max(0, Date.now() - currentTime);
-                        duration = formatDuration(diff);
-                    }
-                }
-
-                html += `
-    <tr>
-        <td>${current.boxCode}</td>
-        <td>${current.source}</td>
-        <td class="${current.online_status}">
-            ${current.online_status}
-        </td>
-        <td>${current.timestamp}</td>
-        <td>${duration}</td>
-    </tr>`;
-            }
-            document.getElementById("logTable").innerHTML = html;
-        }
-        async function loadLiveStatus() {
-
-            try {
-                const res = await fetch("/boxes");
-                const data = await res.json();
-
-                // Safe fallback
-                const rows = data.boxes || [];
-                const summary = data.summary || {
-                    ai: { total: 0, online: 0, offline: 0 },
-                    node: { total: 0, online: 0, offline: 0 }
-                };
-
-                // ================= LIVE TABLE =================
-                document.getElementById("liveTable").innerHTML =
-                    rows.map((row, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${boxNameMap[row.site] || row.site}</td>
-
-                    <td class="${row.aiBoxStatus || "offline"}">
-                        ${row.aiBoxStatus || "offline"}
-                    </td>
-                    <td>${row.aiBoxLast || "-"}</td>
-
-                    <td class="${row.mediaStatus || "stopped"}">
-                        ${row.mediaStatus || "stopped"}
-                    </td>
-                    <td>${row.mediaLast || "-"}</td>
-
-                    <td class="${row.aiServerStatus || "stopped"}">
-                        ${row.aiServerStatus || "stopped"}
-                    </td>
-                    <td>${row.aiServerLast || "-"}</td>
-
-                    <td class="${row.nodeStatus || "offline"}">
-                        ${row.nodeStatus || "offline"}
-                    </td>
-                    <td>${row.nodeLast || "-"}</td>
-                </tr>
-            `).join("");
-
-                // ================= SUMMARY CARDS =================
-
-                document.getElementById("aiTotalHB").innerText =
-                    summary.ai.total;
-
-                document.getElementById("aiOnlineDuration").innerText =
-                    summary.ai.online;
-
-                document.getElementById("aiOfflineDuration").innerText =
-                    summary.ai.offline;
-
-                document.getElementById("nodeTotalHB").innerText =
-                    summary.node.total;
-
-                document.getElementById("nodeOnlineDuration").innerText =
-                    summary.node.online;
-
-                document.getElementById("nodeOfflineDuration").innerText =
-                    summary.node.offline;
-
-            } catch (err) {
-                console.error("Live status load failed:", err);
-            }
-        }
-        async function loadStats() {
-
-            const type = document.getElementById("typeFilter").value;
-            const boxCode = document.getElementById("boxCodeFilter").value;
-            const from = document.getElementById("fromFilter").value;
-            const to = document.getElementById("toFilter").value;
-
-            // Still fetch logs so filter stays functional
-            await fetch(
-                `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
-            );
-
-        }
-        function applyFilter() {
-
-            appliedFilters.type = document.getElementById("typeFilter").value;
-            appliedFilters.boxCode = document.getElementById("boxCodeFilter").value;
-            appliedFilters.from = document.getElementById("fromFilter").value;
-            appliedFilters.to = document.getElementById("toFilter").value;
-
-            const noFilterSelected =
-                appliedFilters.type === "ALL" &&
-                !appliedFilters.boxCode &&
-                !appliedFilters.from &&
-                !appliedFilters.to;
-
-            if (noFilterSelected) {
-                filterApplied = false;
-                loadLogs(false);
-            } else {
-                filterApplied = true;
-                loadLogs(true);
-            }
-        }
-        function resetFilter() {
-
-            filterApplied = false;
-
-            appliedFilters = {
-                type: "ALL",
-                boxCode: "",
-                from: "",
-                to: ""
-            };
-
-            document.getElementById("typeFilter").value = "ALL";
-            document.getElementById("boxCodeFilter").value = "";
-            document.getElementById("fromFilter").value = "";
-            document.getElementById("toFilter").value = "";
-
-            loadLogs(false);
-        }
-        // Initial Load
-        loadFilters();
-        loadLiveStatus();
-        loadLogs(false);   // show last 5
-
-        // Auto Refresh
-        setInterval(() => {
-
-            loadLiveStatus();
-
-            if (filterApplied) {
-                loadLogs(true);   // keep showing filtered data
-            } else {
-                loadLogs(false);  // show latest 5 logs
-            }
-
-        }, 5000);
-    </script>
+   <script src="script.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,261 @@
+document.addEventListener("DOMContentLoaded", () => {
+     
+        const boxNameMap = {
+            "HMXTKE6BEJHBJ0317": "OTOD2",
+            "HQDZKE6BCJEBB1231": "SmartIV"
+        };
+        let filterApplied = false;
+
+        let appliedFilters = {
+            type: "ALL",
+            boxCode: "",
+            from: "",
+            to: ""
+        };
+        function parseTS(ts) {
+            const [d, t] = ts.split(" ");
+            const [day, mon, yr] = d.split("/");
+            return new Date(`${yr}-${mon}-${day}T${t}`);
+        }
+
+        function formatDuration(ms) {
+            const s = Math.floor(ms / 1000);
+            const m = Math.floor(s / 60);
+            const h = Math.floor(m / 60);
+            if (h) return `${h}h ${m % 60}m`;
+            if (m) return `${m}m ${s % 60}s`;
+            return `${s}s`;
+        }
+        async function loadFilters() {
+            try {
+                const res = await fetch("/filters");
+                const data = await res.json();
+
+                const boxSelect = document.getElementById("boxCodeFilter");
+
+
+                // Reset options
+                boxSelect.innerHTML = '<option value="">All Box Codes</option>';
+
+
+                data.boxCodes.forEach(code => {
+                    if (code)
+                        boxSelect.innerHTML += `<option value="${code}">${code}</option>`;
+                });
+
+
+            } catch (err) {
+                console.error("Failed to load filters:", err);
+            }
+        }
+        async function loadLogs(showAll = false) {
+
+            const { type, boxCode, from, to } = appliedFilters;
+
+            const res = await fetch(
+                `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
+            );
+
+            let logs = await res.json();
+
+
+            logs = logs.sort((a, b) =>
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+
+            if (
+                !showAll &&
+                type === "ALL" &&
+                !boxCode &&
+                !from &&
+                !to
+            ) {
+                logs = logs.slice(0, 5);
+            }
+
+            const normalize = (ts) => {
+                const [date, time] = ts.split(" ");
+                const [day, month, year] = date.split("/");
+                return new Date(`${year}-${month}-${day}T${time}`);
+            };
+
+            let html = "";
+
+            for (let i = 0; i < logs.length; i++) {
+
+                const current = logs[i];
+                const currentTime = normalize(current.timestamp)?.getTime();
+
+                let duration = "-";
+
+                if (currentTime) {
+                    let nextTime = null;
+
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (
+                            logs[j].boxCode === current.boxCode &&
+                            logs[j].source === current.source
+                        ) {
+                            nextTime = normalize(logs[j].timestamp)?.getTime();
+                            break;
+                        }
+                    }
+
+                    if (nextTime && nextTime > currentTime) {
+                        duration = formatDuration(nextTime - currentTime);
+                    } else {
+                        const diff = Math.max(0, Date.now() - currentTime);
+                        duration = formatDuration(diff);
+                    }
+                }
+
+                html += `
+    <tr>
+        <td>${current.boxCode}</td>
+        <td>${current.source}</td>
+        <td class="${current.online_status}">
+            ${current.online_status}
+        </td>
+        <td>${current.timestamp}</td>
+        <td>${duration}</td>
+    </tr>`;
+            }
+            document.getElementById("logTable").innerHTML = html;
+        }
+        async function loadLiveStatus() {
+
+            try {
+                const res = await fetch("/boxes");
+                const data = await res.json();
+
+                // Safe fallback
+                const rows = data.boxes || [];
+                const summary = data.summary || {
+                    ai: { total: 0, online: 0, offline: 0 },
+                    node: { total: 0, online: 0, offline: 0 }
+                };
+
+                // ================= LIVE TABLE =================
+                document.getElementById("liveTable").innerHTML =
+                    rows.map((row, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${boxNameMap[row.site] || row.site}</td>
+
+                    <td class="${row.aiBoxStatus || "offline"}">
+                        ${row.aiBoxStatus || "offline"}
+                    </td>
+                    <td>${row.aiBoxLast || "-"}</td>
+
+                    <td class="${row.mediaStatus || "stopped"}">
+                        ${row.mediaStatus || "stopped"}
+                    </td>
+                    <td>${row.mediaLast || "-"}</td>
+
+                    <td class="${row.aiServerStatus || "stopped"}">
+                        ${row.aiServerStatus || "stopped"}
+                    </td>
+                    <td>${row.aiServerLast || "-"}</td>
+
+                    <td class="${row.nodeStatus || "offline"}">
+                        ${row.nodeStatus || "offline"}
+                    </td>
+                    <td>${row.nodeLast || "-"}</td>
+                </tr>
+            `).join("");
+
+                // ================= SUMMARY CARDS =================
+
+                document.getElementById("aiTotalHB").innerText =
+                    summary.ai.total;
+
+                document.getElementById("aiOnlineDuration").innerText =
+                    summary.ai.online;
+
+                document.getElementById("aiOfflineDuration").innerText =
+                    summary.ai.offline;
+
+                document.getElementById("nodeTotalHB").innerText =
+                    summary.node.total;
+
+                document.getElementById("nodeOnlineDuration").innerText =
+                    summary.node.online;
+
+                document.getElementById("nodeOfflineDuration").innerText =
+                    summary.node.offline;
+
+            } catch (err) {
+                console.error("Live status load failed:", err);
+            }
+        }
+        async function loadStats() {
+
+            const type = document.getElementById("typeFilter").value;
+            const boxCode = document.getElementById("boxCodeFilter").value;
+            const from = document.getElementById("fromFilter").value;
+            const to = document.getElementById("toFilter").value;
+
+            // Still fetch logs so filter stays functional
+            await fetch(
+                `/logs?type=${type}&boxCode=${boxCode}&from=${from}&to=${to}`
+            );
+
+        }
+        function applyFilter() {
+
+            appliedFilters.type = document.getElementById("typeFilter").value;
+            appliedFilters.boxCode = document.getElementById("boxCodeFilter").value;
+            appliedFilters.from = document.getElementById("fromFilter").value;
+            appliedFilters.to = document.getElementById("toFilter").value;
+
+            const noFilterSelected =
+                appliedFilters.type === "ALL" &&
+                !appliedFilters.boxCode &&
+                !appliedFilters.from &&
+                !appliedFilters.to;
+
+            if (noFilterSelected) {
+                filterApplied = false;
+                loadLogs(false);
+            } else {
+                filterApplied = true;
+                loadLogs(true);
+            }
+        }
+        function resetFilter() {
+
+            filterApplied = false;
+
+            appliedFilters = {
+                type: "ALL",
+                boxCode: "",
+                from: "",
+                to: ""
+            };
+
+            document.getElementById("typeFilter").value = "ALL";
+            document.getElementById("boxCodeFilter").value = "";
+            document.getElementById("fromFilter").value = "";
+            document.getElementById("toFilter").value = "";
+
+            loadLogs(false);
+        }
+        // Initial Load
+        loadFilters();
+        loadLiveStatus();
+        loadLogs(false);   // show last 5
+
+        // Auto Refresh
+        setInterval(() => {
+
+            loadLiveStatus();
+
+            if (filterApplied) {
+                loadLogs(true);   // keep showing filtered data
+            } else {
+                loadLogs(false);  // show latest 5 logs
+            }
+
+        }, 5000);
+    
+});
