@@ -140,13 +140,7 @@ tbody tr:hover {
     color: #2563eb;
 }
 
-.summary-title {
-   text-align: left;
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #334155;
-}
+
 .section-header {
     font-size: 20px;
     font-weight: 600;
