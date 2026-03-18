@@ -289,5 +289,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     }, 5000);
-
+window.applyFilter = applyFilter;
+window.resetFilter = resetFilter;
 });
