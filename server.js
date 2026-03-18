@@ -65,26 +65,19 @@ app.get("/logs", async (req, res) => {
       query.boxCode = boxCode.trim();
     }
 
-    // ✅ FIX: add timestamp filter BEFORE fetching
+
     if (from || to) {
       query.timestamp = {};
 
       if (from) {
         const fromDate = new Date(from);
-
-        // 🔥 go back 1 day (important for duration logic)
-        fromDate.setDate(fromDate.getDate() - 1);
-
-        query.timestamp.$gte = fromDate;
+        query.timestamp.$gte = fromDate;   // ❌ NO -1 day
       }
 
       if (to) {
         const toDate = new Date(to);
-
-        // optional but recommended
         toDate.setSeconds(59);
         toDate.setMilliseconds(999);
-
         query.timestamp.$lte = toDate;
       }
     }
@@ -349,50 +342,50 @@ app.get("/boxes", async (req, res) => {
       });
     }
     // ================= SUMMARY COUNTERS =================
-let totalAi = 0;
-let onlineAi = 0;
-let offlineAi = 0;
+    let totalAi = 0;
+    let onlineAi = 0;
+    let offlineAi = 0;
 
-let totalNode = 0;
-let onlineNode = 0;
-let offlineNode = 0;
+    let totalNode = 0;
+    let onlineNode = 0;
+    let offlineNode = 0;
 
-for (const row of rows) {
+    for (const row of rows) {
 
-  // AI BOX
-  if (row.aiBoxLast !== "-") {
-    totalAi++;
+      // AI BOX
+      if (row.aiBoxLast !== "-") {
+        totalAi++;
 
-    if (row.aiBoxStatus === "online") onlineAi++;
-    else offlineAi++;
-  }
+        if (row.aiBoxStatus === "online") onlineAi++;
+        else offlineAi++;
+      }
 
-  // NODE RED
-  if (row.nodeLast !== "-") {
-    totalNode++;
+      // NODE RED
+      if (row.nodeLast !== "-") {
+        totalNode++;
 
-    if (row.nodeStatus === "online") onlineNode++;
-    else offlineNode++;
-  }
-}
-
-res.json({
-  boxes: rows,
-  summary: {
-    ai: {
-      total: totalAi,
-      online: onlineAi,
-      offline: offlineAi
-    },
-    node: {
-      total: totalNode,
-      online: onlineNode,
-      offline: offlineNode
+        if (row.nodeStatus === "online") onlineNode++;
+        else offlineNode++;
+      }
     }
-  }
-});
 
-   
+    res.json({
+      boxes: rows,
+      summary: {
+        ai: {
+          total: totalAi,
+          online: onlineAi,
+          offline: offlineAi
+        },
+        node: {
+          total: totalNode,
+          online: onlineNode,
+          offline: offlineNode
+        }
+      }
+    });
+
+
 
   } catch (err) {
     console.error(err);
@@ -438,40 +431,40 @@ async function startOfflineChecker() {
     }
     // ================= NODE RED OFFLINE CHECK =================
 
-const nodeBoxes = await Log.distinct("boxCode", { source: "NODE_RED" });
+    const nodeBoxes = await Log.distinct("boxCode", { source: "NODE_RED" });
 
-for (const boxCode of nodeBoxes) {
+    for (const boxCode of nodeBoxes) {
 
-  const lastHeartbeat = await Log.findOne({
-    boxCode,
-    source: "NODE_RED",
-    type: "heartbeat"
-  }).sort({ _id: -1 });
+      const lastHeartbeat = await Log.findOne({
+        boxCode,
+        source: "NODE_RED",
+        type: "heartbeat"
+      }).sort({ _id: -1 });
 
-  const lastStatus = await Log.findOne({
-    boxCode,
-    source: "NODE_RED",
-    type: "status_change"
-  }).sort({ _id: -1 });
+      const lastStatus = await Log.findOne({
+        boxCode,
+        source: "NODE_RED",
+        type: "status_change"
+      }).sort({ _id: -1 });
 
-  if (!lastHeartbeat?.timestamp || !lastStatus) continue;
+      if (!lastHeartbeat?.timestamp || !lastStatus) continue;
 
-  if (
-    lastStatus.online_status === "online" &&
-    Date.now() - new Date(lastHeartbeat.timestamp).getTime() >  3 * 60 * 1000
-  ) {
+      if (
+        lastStatus.online_status === "online" &&
+        Date.now() - new Date(lastHeartbeat.timestamp).getTime() > 3 * 60 * 1000
+      ) {
 
-    await saveLog({
-      boxCode,
-      ip: lastHeartbeat.ip,
-      source: "NODE_RED",
-      online_status: "offline",
-      type: "status_change"
-    });
+        await saveLog({
+          boxCode,
+          ip: lastHeartbeat.ip,
+          source: "NODE_RED",
+          online_status: "offline",
+          type: "status_change"
+        });
 
-    console.log(`NODE-RED STATUS: ${boxCode} ONLINE → OFFLINE`);
-  }
-}
+        console.log(`NODE-RED STATUS: ${boxCode} ONLINE → OFFLINE`);
+      }
+    }
 
   }, 5000);
 }
