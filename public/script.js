@@ -27,20 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (m) return `${m}m ${s % 60}s`;
         return `${s}s`;
     }
-    function setDefaultFromDate() {
-        const input = document.getElementById("fromFilter");
+   function setDefaultFromDate() {
+    const input = document.getElementById("fromFilter");
 
-        // 👉 ONLY set if empty (important)
-        if (!input.value) {
-            const now = new Date();
+    const now = new Date();
 
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, "0");
-            const dd = String(now.getDate()).padStart(2, "0");
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
 
-            input.value = `${yyyy}-${mm}-${dd}T00:00`;
-        }
-    }
+
+    input.value = `${yyyy}-${mm}-${dd}T00:00`;
+}
     async function loadFilters() {
         try {
             const res = await fetch("/filters");
@@ -305,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
    loadFilters();
 loadLiveStatus();
 
-// 🔥 Delay to override browser restore
+// Delay to override browser restore
 setTimeout(() => {
     const fromInput = document.getElementById("fromFilter");
     fromInput.value = "";
