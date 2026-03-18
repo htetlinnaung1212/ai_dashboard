@@ -88,10 +88,15 @@ tbody tr:hover {
     display: grid;
     grid-template-columns: 3fr 1fr;
     gap: 20px;
-    align-items: start;
-    margin-top: 20px;
+    align-items: start; 
+}
+.table-section h2 {
+    margin-top: 0;
 }
 
+.summary-title {
+    margin-top: 0;
+}
 .table-section {
     display: flex;
     flex-direction: column;
@@ -137,6 +142,17 @@ tbody tr:hover {
     font-size: 16px;
     font-weight: 600;
     color: #334155;
+}
+.section-header {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 40px 0;
+    width: 100%;   
 }
 
 /* ================= FILTER ================= */
