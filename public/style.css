@@ -135,11 +135,10 @@ thead tr:first-child th {
   letter-spacing: 0;
 }
 
-thead tr:nth-child(2) th {
+thead tr:nth-child(2) th:not(.col-device):not(.col-media):not(.col-ai):not(.col-node) {
   background: linear-gradient(135deg, var(--blue-2), var(--blue-3));
   color: #fff;
 }
-
 tbody tr {
   transition: background var(--ease) 0.15s;
 }

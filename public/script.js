@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             html += `
     <tr>
-        <td>${current.boxCode}</td>
+       <td>${boxNameMap[current.boxCode] || current.boxCode}</td>
         <td>${current.source}</td>
         <td class="${current.online_status}">
             ${current.online_status}
