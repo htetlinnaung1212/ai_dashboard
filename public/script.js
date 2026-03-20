@@ -27,18 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (m) return `${m}m ${s % 60}s`;
         return `${s}s`;
     }
-   function setDefaultFromDate() {
-    const input = document.getElementById("fromFilter");
+    function setDefaultFromDate() {
+        const input = document.getElementById("fromFilter");
 
-    const now = new Date();
+        const now = new Date();
 
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
 
 
-    input.value = `${yyyy}-${mm}-${dd}T00:00`;
-}
+        input.value = `${yyyy}-${mm}-${dd}T00:00`;
+    }
     async function loadFilters() {
         try {
             const res = await fetch("/filters");
@@ -155,23 +155,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${duration}</td>
     </tr>`;
         }
-        if (!filterApplied) {
-            document.getElementById("totalOnline").innerText = "-";
-            document.getElementById("totalOffline").innerText = "-";
-        } else {
-            const selectedStatus = appliedFilters.status;
+        // ✅ Count rows shown in table
+        const totalRows = html ? html.split("<tr>").length - 1 : 0;
 
-            if (selectedStatus === "online") {
-                document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
-                document.getElementById("totalOffline").innerText = "-";
-            } else if (selectedStatus === "offline") {
-                document.getElementById("totalOnline").innerText = "-";
-                document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
-            } else {
-                document.getElementById("totalOnline").innerText = formatDuration(totalOnlineMs);
-                document.getElementById("totalOffline").innerText = formatDuration(totalOfflineMs);
-            }
-        }
+        // ✅ Sum ALL durations (online + offline)
+        const totalDurationMs = totalOnlineMs + totalOfflineMs;
+
+        // ✅ Update cards
+        document.getElementById("totalRows").innerText = totalRows;
+        document.getElementById("totalDuration").innerText = formatDuration(totalDurationMs);
         document.getElementById("logTable").innerHTML = html;
     }
 
@@ -300,17 +292,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loadLogs(false);
     }
-   loadFilters();
-loadLiveStatus();
+    loadFilters();
+    loadLiveStatus();
 
-// Delay to override browser restore
-setTimeout(() => {
-    const fromInput = document.getElementById("fromFilter");
-    fromInput.value = "";
-    setDefaultFromDate();
-}, 0);
+    // Delay to override browser restore
+    setTimeout(() => {
+        const fromInput = document.getElementById("fromFilter");
+        fromInput.value = "";
+        setDefaultFromDate();
+    }, 0);
 
-loadLogs(false);
+    loadLogs(false);
 
     // Auto Refresh
     setInterval(() => {

@@ -165,12 +165,10 @@ tbody tr:hover { background: var(--blue-soft); }
 
 /* ================= DASHBOARD LAYOUT ================= */
 .dashboard-container {
-  display: grid;
-  grid-template-columns: 3fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
 }
-
 .table-section {
   display: flex;
   flex-direction: column;
@@ -214,8 +212,18 @@ tbody tr:hover { background: var(--blue-soft); }
 
 .summary-section {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  flex-wrap: wrap;   
+}
+
+.summary-section > div {
+  flex: 1;
+  min-width: 280px;  
+}
+@media (max-width: 900px) {
+  .summary-section {
+    flex-direction: column;
+  }
 }
 
 .summary-section > div {
@@ -488,20 +496,16 @@ tr.offline-row:hover {
 @media (max-width: 900px) {
   body { padding: 16px 14px 48px; }
 
-  .dashboard-container {
-    grid-template-columns: 1fr;
-  }
-
+  /* Stack summary cards vertically */
   .summary-section {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
   }
 
   .summary-section > div {
-    flex: 1;
-    min-width: 220px;
+    width: 100%;
   }
 
+  /* Keep 3 small cards inside each summary */
   .summary {
     grid-template-columns: repeat(3, 1fr);
   }
