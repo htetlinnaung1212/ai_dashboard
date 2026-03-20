@@ -69,15 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     async function loadLogs(showAll = false) {
-        const title = document.getElementById("totalRowsTitle");
 
-        if (appliedFilters.status === "online") {
-            title.innerText = "Total Online";
-        } else if (appliedFilters.status === "offline") {
-            title.innerText = "Total Offline";
-        } else {
-            title.innerText = "Total Rows";
-        }
 
         const { type, boxCode, from, to, status } = appliedFilters;
 
@@ -182,16 +174,20 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("totalDuration").innerText = formatDuration(totalDurationMs);
         document.getElementById("logTable").innerHTML = html;
         document.getElementById("logTable").innerHTML = html;
-
-        //  Change card color based on filter
-        const card = document.querySelector(".online-card");
+        const title = document.getElementById("totalRowsTitle");
 
         if (appliedFilters.status === "online") {
+            title.innerText = "Total Online";
+            title.style.color = "#16a34a";
             value.style.color = "#16a34a";
         } else if (appliedFilters.status === "offline") {
-             value.style.color = "#dc2626"; ; // red
+            title.innerText = "Total Offline";
+            title.style.color = "#dc2626";
+            value.style.color = "#dc2626";
         } else {
-             value.style.color = "";  // default
+            title.innerText = "Total Rows";
+            title.style.color = "";
+            value.style.color = "";
         }
     }
 
