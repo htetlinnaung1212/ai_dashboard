@@ -74,16 +74,17 @@
                             <th colspan="2">Node-RED</th>
                         </tr>
                         <tr>
-                            <th class="col-device">Device Status</th>
-                            <th>Last Heartbeat</th>
+                            <th class="group-device">Device Status</th>
+                            <th class="group-device">Last Heartbeat</th>
 
-                            <th class="col-media">Media</th>
-                            <th>Last Update</th>
-                            <th class="col-ai">AI Server</th>
-                            <th>Last Update</th>
+                            <th class="group-media">Media</th>
+                            <th class="group-media">Last Update</th>
 
-                            <th class="col-node">Service</th>
-                            <th>Last Update</th>
+                            <th class="group-ai">AI Server</th>
+                            <th class="group-ai">Last Update</th>
+
+                            <th class="group-node">Service</th>
+                            <th class="group-node">Last Update</th>
                         </tr>
                     </thead>
                     <tbody id="liveTable">
@@ -145,12 +146,12 @@
     </div>
     <div class="history-summary">
         <div class="card online-card">
-            <h3>Total Rows</h3>
+            <h2>Total Rows</h2>
             <p id="totalRows">0</p>
         </div>
 
         <div class="card offline-card">
-            <h3>Total Duration</h3>
+            <h2>Total Duration</h2>
             <p id="totalDuration">0</p>
         </div>
     </div>
