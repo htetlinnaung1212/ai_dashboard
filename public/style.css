@@ -141,25 +141,25 @@ thead tr:nth-child(2) th:not(.group-device):not(.group-media):not(.group-ai):not
 }
 /* 1 - Yellow: Device Status + Last Heartbeat */
 thead tr:nth-child(2) th.group-device {
-  background: linear-gradient(135deg, #b45309, #d97706) !important;
-  color: #fff;
+  background: #eab308;
+  color: #713f12;
 }
 
 /* 2 - Orange: Media + Last Update */
 thead tr:nth-child(2) th.group-media {
-  background: linear-gradient(135deg, #c2410c, #ea580c) !important;
+  background: #f97316;
   color: #fff;
 }
 
 /* 3 - Red: AI Server + Last Update */
 thead tr:nth-child(2) th.group-ai {
-  background: linear-gradient(135deg, #991b1b, #dc2626) !important;
+  background: #ef4444;
   color: #fff;
 }
 
 /* 4 - Green: Service + Last Update */
 thead tr:nth-child(2) th.group-node {
-  background: linear-gradient(135deg, #15803d, #16a34a) !important;
+  background: #22c55e;
   color: #fff;
 }
 tbody tr {
