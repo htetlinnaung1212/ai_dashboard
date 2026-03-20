@@ -490,48 +490,7 @@ tr.offline-row:hover {
   margin-bottom: 12px;
   color: var(--text-1);
 }
-/* Make headers relative */
-thead tr:nth-child(2) th {
-  position: relative;
-}
 
-/* Shared line style */
-thead tr:nth-child(2) th::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  height: 4px;
-}
-
-/* ===== GROUPED LINES ===== */
-
-/* 🟡 DEVICE (span across 2 columns) */
-thead tr:nth-child(2) th.group-device:first-of-type::before {
-  left: 10%;
-  width: 180%; /* span to next column */
-  background: #eab308;
-}
-
-/* MEDIA */
-thead tr:nth-child(2) th.group-media:first-of-type::before {
-  left: 10%;
-  width: 180%;
-  background: #f97316;
-}
-
-/* AI SERVER */
-thead tr:nth-child(2) th.group-ai:first-of-type::before {
-  left: 10%;
-  width: 180%;
-  background: #ef4444;
-}
-
-/*  NODE */
-thead tr:nth-child(2) th.group-node:first-of-type::before {
-  left: 10%;
-  width: 180%;
-  background: #22c55e;
-}
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px) {
   body { padding: 16px 14px 48px; }
