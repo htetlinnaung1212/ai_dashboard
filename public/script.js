@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             title.style.color = "#dc2626";
             value.style.color = "#dc2626";
         } else {
-            title.innerText = "Total Rows";
+            title.innerText = "Total";
             title.style.color = "";
             value.style.color = "";
         }
