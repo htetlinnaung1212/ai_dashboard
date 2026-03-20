@@ -187,11 +187,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = document.querySelector(".online-card");
 
         if (appliedFilters.status === "online") {
-            card.style.color = "#16a34a"; // green
+            value.style.color = "#16a34a";
         } else if (appliedFilters.status === "offline") {
-            card.style.color = "#dc2626"; // red
+             value.style.color = "#dc2626"; ; // red
         } else {
-            card.style.color = ""; // default
+             value.style.color = "";  // default
         }
     }
 
