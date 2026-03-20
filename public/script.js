@@ -52,8 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             data.boxCodes.forEach(code => {
-                if (code)
-                    boxSelect.innerHTML += `<option value="${code}">${code}</option>`;
+                if (code) {
+                    const displayName = boxNameMap[code] || code;
+
+                    boxSelect.innerHTML += `
+            <option value="${code}">
+                ${displayName}
+            </option>
+        `;
+                }
             });
 
 
