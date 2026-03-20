@@ -135,31 +135,26 @@ thead tr:first-child th {
   letter-spacing: 0;
 }
 
-thead tr:nth-child(2) th:not(.group-device):not(.group-media):not(.group-ai):not(.group-node) {
-  background: linear-gradient(135deg, var(--blue-2), var(--blue-3));
-  color: #fff;
-}
-/* 1 - Yellow: Device Status + Last Heartbeat */
 thead tr:nth-child(2) th.group-device {
-  background: #eab308;
-  color: #713f12;
+  background: linear-gradient(135deg, #b45309, #d97706) !important;
+  color: #fff;
 }
 
 /* 2 - Orange: Media + Last Update */
 thead tr:nth-child(2) th.group-media {
-  background: #f97316;
+  background: linear-gradient(135deg, #c2410c, #ea580c) !important;
   color: #fff;
 }
 
 /* 3 - Red: AI Server + Last Update */
 thead tr:nth-child(2) th.group-ai {
-  background: #ef4444;
+  background: linear-gradient(135deg, #991b1b, #dc2626) !important;
   color: #fff;
 }
 
 /* 4 - Green: Service + Last Update */
 thead tr:nth-child(2) th.group-node {
-  background: #22c55e;
+  background: linear-gradient(135deg, #15803d, #16a34a) !important;
   color: #fff;
 }
 tbody tr {
