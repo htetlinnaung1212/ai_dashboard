@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const boxNameMap = {
         "HMXTKE6BEJHBJ0317": "OTOD2",
-        "HQDZKE6BCJEBB1231": "SmartIV"
+        "HQDZKE6BCJEBB1231": "SmartIV",
+        "HQDZKE6BCJEBB1101": "LMC"
     };
     let filterApplied = false;
 
