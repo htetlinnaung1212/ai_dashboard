@@ -896,27 +896,30 @@ app.get("/boxes", async (req, res) => {
       });
     }
 
-    let totalAi = 0;
-    let onlineAi = 0;
-    let offlineAi = 0;
+    let totalAi = rows.length;
+let onlineAi = 0;
+let offlineAi = 0;
 
-    let totalNode = 0;
-    let onlineNode = 0;
-    let offlineNode = 0;
+let totalNode = rows.length;
+let onlineNode = 0;
+let offlineNode = 0;
 
-    for (const row of rows) {
-      if (row.aiBoxLast !== "-") {
-        totalAi++;
-        if (row.aiBoxStatus === "online") onlineAi++;
-        else offlineAi++;
-      }
+for (const row of rows) {
 
-      if (row.nodeLast !== "-") {
-        totalNode++;
-        if (row.nodeStatus === "online") onlineNode++;
-        else offlineNode++;
-      }
-    }
+  // AI BOX
+  if (row.aiBoxStatus === "online") {
+    onlineAi++;
+  } else {
+    offlineAi++;
+  }
+
+  // NODE RED
+  if (row.nodeStatus === "online") {
+    onlineNode++;
+  } else {
+    offlineNode++;
+  }
+}
 
     return res.json({
       boxes: rows,
