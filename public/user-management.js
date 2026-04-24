@@ -60,16 +60,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const actions = (() => {
                 if (currentUserRole === "super-admin") {
                     return `
-            <button class="btn-secondary edit-user-btn" data-id="${user._id}">Edit</button>
-            <button class="btn-secondary btn-danger remove-user-btn" data-id="${user._id}">Remove</button>
+            <button class="btn-secondary edit-user-btn" data-id="${user.id}">Edit</button>
+            <button class="btn-secondary btn-danger remove-user-btn" data-id="${user.id}">Remove</button>
         `;
                 }
 
                 if (currentUserRole === "admin") {
                     if (user.role === "user") {
                         return `
-                <button class="btn-secondary edit-user-btn" data-id="${user._id}">Edit</button>
-                <button class="btn-secondary btn-danger remove-user-btn" data-id="${user._id}">Remove</button>
+                <button class="btn-secondary edit-user-btn" data-id="${user.id}">Edit</button>
+                <button class="btn-secondary btn-danger remove-user-btn" data-id="${user.id}">Remove</button>
             `;
                     }
 
@@ -190,10 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function openEditUserModal(userId) {
-        const user = usersCache.find(item => item._id === userId);
+        const user = usersCache.find(item => item.id === userId);
         if (!user) return;
 
-        document.getElementById("editUserId").value = user._id;
+        document.getElementById("editUserId").value = user.id;
         document.getElementById("editUsernameInput").value = user.username;
         document.getElementById("editPasswordInput").value = "";
         document.getElementById("editConfirmPasswordInput").value = "";
